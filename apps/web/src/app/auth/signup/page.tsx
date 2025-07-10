@@ -122,7 +122,7 @@ export default function SignUpPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white korean-text">
-              CareeLog
+              CareerLog
             </h1>
             <p className="text-white/90 korean-text">
               소중한 생명을 구하는 의료진들을 위한 커리어관리 플랫폼
@@ -137,7 +137,7 @@ export default function SignUpPage() {
               회원가입
             </CardTitle>
             <CardDescription className="korean-text">
-              CareeLog과 함께 경력 관리를 시작하세요
+              CareerLog과 함께 경력 관리를 시작하세요
             </CardDescription>
           </CardHeader>
           <CardContent>

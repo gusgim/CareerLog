@@ -150,7 +150,7 @@ export default function AuthCallbackPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white korean-text">
-              CareeLog
+              CareerLog
             </h1>
             <p className="text-white/90 korean-text">
               이메일 인증 처리 중
@@ -176,7 +176,7 @@ export default function AuthCallbackPage() {
               <div className="text-center space-y-4">
                 <div className="p-4 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-700 korean-text">
-                    🎉 환영합니다! CareeLog 회원가입이 완료되었습니다.<br />
+                    🎉 환영합니다! CareerLog 회원가입이 완료되었습니다.<br />
                     곧 대시보드로 이동합니다.
                   </p>
                 </div>

@@ -14,7 +14,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "CareeLog - 의료진을 위한 경력 관리 플랫폼",
+      title: "CareerLog - 의료진을 위한 경력 관리 플랫폼",
   description: "30초 만에 빠른 활동 기록, 전문적인 성과 보고서 생성",
   keywords: ["의료진", "경력관리", "성과보고서", "간호사", "의료진 커리어"],
 }

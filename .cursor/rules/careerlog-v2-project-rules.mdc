@@ -1,7 +1,7 @@
 ---
 alwaysApply: true
 ---
-# Project: CareeLog - Personal Career & Performance Consultant
+# Project: CareerLog - Personal Career & Performance Consultant
 
 ## 1. Core Technology Stack (Non-Negotiable)
 - **Primary Framework:** Next.js 14 with the App Router. All new pages and layouts must be created in the `/app` directory. Use Server Components by default and 'use client' only when necessary.

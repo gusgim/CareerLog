@@ -1,4 +1,4 @@
-# CareeLog Web App
+# CareerLog Web App
 
 ## Environment Variables
 

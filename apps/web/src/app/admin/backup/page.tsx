@@ -73,7 +73,7 @@ interface BackupInfo {
 const mockBackups: BackupInfo[] = [
   {
     id: "1",
-    filename: "careerlog_backup_2025-01-08_14-30-00.sql",
+          filename: "CareerLog_backup_2025-01-08_14-30-00.sql",
     created_at: new Date().toISOString(),
     size: 2048576, // 2MB
     type: "manual",
@@ -83,7 +83,7 @@ const mockBackups: BackupInfo[] = [
   },
   {
     id: "2", 
-    filename: "careerlog_backup_2025-01-07_02-00-00.sql",
+          filename: "CareerLog_backup_2025-01-07_02-00-00.sql",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     size: 1895432,
     type: "auto",
@@ -93,7 +93,7 @@ const mockBackups: BackupInfo[] = [
   },
   {
     id: "3",
-    filename: "careerlog_backup_2025-01-06_02-00-00.sql", 
+          filename: "CareerLog_backup_2025-01-06_02-00-00.sql", 
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
     size: 1567890,
     type: "auto",
@@ -103,7 +103,7 @@ const mockBackups: BackupInfo[] = [
   },
   {
     id: "4",
-    filename: "careerlog_backup_2025-01-05_14-15-30.sql",
+          filename: "CareerLog_backup_2025-01-05_14-15-30.sql",
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
     size: 987654,
     type: "manual",
@@ -172,7 +172,7 @@ export default function BackupPage() {
     setTimeout(() => {
       const newBackup: BackupInfo = {
         id: Date.now().toString(),
-        filename: `careerlog_backup_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.sql`,
+        filename: `CareerLog_backup_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.sql`,
         created_at: new Date().toISOString(),
         size: Math.floor(Math.random() * 3000000) + 1000000, // 1-4MB 랜덤
         type: "manual",

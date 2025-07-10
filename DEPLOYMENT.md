@@ -4,10 +4,10 @@
 
 ### 1. Supabase 프로젝트 설정
 
-1. [Supabase 콘솔](https://supabase.com/dashboard)에 로그인
+1. [Supabase 콘솔](https://supabase.com/dashboard)에 로그인   ( Org PW : pGxe8h3aF8CO9ga1 )
 2. **New Project** 클릭하여 새 프로젝트 생성
 3. 프로젝트 이름: `careerlog-production`
-4. 데이터베이스 비밀번호 설정 및 저장
+4. 데이터베이스 비밀번호 설정 및 저장   ( Mcro1uBHboAnZF9C )
 5. 리전 선택: **Northeast Asia (Seoul)** 권장
 
 ### 2. 데이터베이스 스키마 설정

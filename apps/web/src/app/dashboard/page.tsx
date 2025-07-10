@@ -170,7 +170,7 @@ export default function DashboardPage() {
                 <span className="text-lg font-bold text-white">🏥</span>
               </div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white korean-text">
-                CareeLog
+                CareerLog
               </h1>
             </div>
             <div className="flex items-center space-x-3">

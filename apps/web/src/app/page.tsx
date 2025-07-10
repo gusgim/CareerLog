@@ -47,7 +47,7 @@ export default function HomePage() {
       } else {
         toast({
           title: "✅ 로그인 성공!",
-          description: "CareeLog에 오신 것을 환영합니다! 잠시 후 대시보드로 이동합니다.",
+          description: "CareerLog에 오신 것을 환영합니다! 잠시 후 대시보드로 이동합니다.",
           variant: "success",
           duration: 4000,
         })
@@ -99,7 +99,7 @@ export default function HomePage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white korean-text">
-              CareeLog
+              CareerLog
             </h1>
             <p className="text-white/90 korean-text">
               소중한 생명을 구하는 의료진들을 위한 커리어관리 플랫폼
