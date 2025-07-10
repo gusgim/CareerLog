@@ -56,7 +56,7 @@ export default function SystemSettingsPage() {
     isLoading: isLoadingSettings,
     refetch: refetchSettings
   } = api.admin.getSystemSettings.useQuery(
-    {},
+    undefined,
     { 
       enabled: !!user && isAdmin,
       retry: false,

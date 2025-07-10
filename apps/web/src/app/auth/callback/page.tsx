@@ -9,10 +9,11 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { CheckCircle, XCircle, Loader2, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { Suspense } from "react"
 
 type VerificationStatus = "loading" | "success" | "error" | "already_verified"
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const [status, setStatus] = useState<VerificationStatus>("loading")
   const [message, setMessage] = useState("")
   const router = useRouter()
@@ -199,14 +200,13 @@ export default function AuthCallbackPage() {
                   </p>
                 </div>
                 
-                <div className="space-y-3">
-                  <Link href="/auth/verify-email">
+                <div className="space-y-2">
+                  <Link href="/auth/verify-email" className="block">
                     <Button variant="outline" className="w-full h-12 korean-text">
-                      인증 이메일 재발송
+                      이메일 인증 페이지로 이동
                     </Button>
                   </Link>
-                  
-                  <Link href="/">
+                  <Link href="/" className="block">
                     <Button variant="ghost" className="w-full h-12 korean-text">
                       로그인 페이지로 돌아가기
                     </Button>
@@ -216,35 +216,32 @@ export default function AuthCallbackPage() {
             )}
 
             {status === "loading" && (
-              <div className="text-center space-y-4">
+              <div className="text-center">
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700 korean-text">
-                    이메일 인증을 처리하고 있습니다.<br />
-                    잠시만 기다려주세요...
+                    🔄 인증 처리 중입니다. 잠시만 기다려주세요...
                   </p>
-                </div>
-                
-                <div className="animate-pulse space-y-2">
-                  <div className="h-2 bg-blue-200 rounded"></div>
-                  <div className="h-2 bg-blue-200 rounded w-3/4"></div>
-                  <div className="h-2 bg-blue-200 rounded w-1/2"></div>
                 </div>
               </div>
             )}
-
-            {/* 도움말 */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-700 korean-text mb-2">문제가 발생했나요?</h4>
-              <ul className="text-sm text-gray-600 space-y-1 korean-text">
-                <li>• 인증 링크는 24시간 동안만 유효합니다</li>
-                <li>• 링크를 이미 사용했다면 새 링크를 요청하세요</li>
-                <li>• 브라우저의 쿠키가 활성화되어 있는지 확인하세요</li>
-                <li>• 문제가 지속되면 관리자에게 문의하세요</li>
-              </ul>
-            </div>
           </CardContent>
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">페이지를 로딩하는 중...</p>
+        </div>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 } 

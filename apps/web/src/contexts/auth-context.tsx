@@ -306,9 +306,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`, // 인증 후 리다이렉트할 URL
-        },
       })
 
       if (error) {
