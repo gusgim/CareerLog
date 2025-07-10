@@ -122,7 +122,7 @@ export default function UsersManagementPage() {
 
   // 통계 계산
   const totalUsers = totalCount
-  const adminUsers = users.filter(u => u.user_metadata?.role === 'admin').length
+  const adminUsers = users.filter(u => u.role === 'admin').length
   const activeUsers = users.filter(u => u.last_sign_in_at && 
     new Date(u.last_sign_in_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length
 

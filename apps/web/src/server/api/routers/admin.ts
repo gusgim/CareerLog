@@ -49,9 +49,29 @@ export const adminRouter = createTRPCRouter({
           totalUsers: 15,
           activeUsers: 12,
           totalLogs: 342,
-          recentLogs: 28,
-          systemHealth: 'healthy',
-          lastBackup: '2024-01-15T10:30:00Z',
+          reportsGenerated: 28,
+          dailyActiveUsers: [
+            { date: '2024-01-14', count: 8 },
+            { date: '2024-01-15', count: 10 },
+            { date: '2024-01-16', count: 9 },
+            { date: '2024-01-17', count: 12 },
+            { date: '2024-01-18', count: 11 },
+            { date: '2024-01-19', count: 13 },
+            { date: '2024-01-20', count: 15 },
+          ],
+          categoryStats: [
+            { category: '수술', count: 120, percentage: 35.1 },
+            { category: '진료', count: 85, percentage: 24.9 },
+            { category: '교육', count: 58, percentage: 17.0 },
+            { category: '연구', count: 45, percentage: 13.2 },
+            { category: '학회', count: 25, percentage: 7.3 },
+            { category: '기타', count: 9, percentage: 2.6 },
+          ],
+          monthlyGrowth: {
+            userGrowth: 12.5,
+            activityGrowth: 28.3,
+            reportGrowth: 15.7,
+          },
         };
       }
 
@@ -87,9 +107,14 @@ export const adminRouter = createTRPCRouter({
           totalUsers: profiles?.length || 0,
           activeUsers,
           totalLogs: logs?.length || 0,
-          recentLogs,
-          systemHealth: 'healthy',
-          lastBackup: new Date().toISOString(),
+          reportsGenerated: recentLogs, // recentLogs를 reportsGenerated로 매핑
+          dailyActiveUsers: [], // 실제 구현에서는 일별 활성 사용자 데이터를 계산
+          categoryStats: [], // 실제 구현에서는 카테고리별 통계를 계산
+          monthlyGrowth: {
+            userGrowth: 0, // 실제 구현에서는 전월 대비 성장률 계산
+            activityGrowth: 0,
+            reportGrowth: 0,
+          },
         };
       } catch (error) {
         console.error('시스템 통계 조회 오류:', error);
@@ -99,7 +124,13 @@ export const adminRouter = createTRPCRouter({
 
   // 모든 사용자 목록 조회
   getAllUsers: protectedProcedure
-    .query(async ({ ctx }) => {
+    .input(z.object({
+      limit: z.number().min(1).max(100).default(20),
+      offset: z.number().min(0).default(0),
+      search: z.string().optional(),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const { limit = 20, offset = 0, search } = input || {};
       // 개발 모드 확인
       const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
                                process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
@@ -110,24 +141,33 @@ export const adminRouter = createTRPCRouter({
       }
 
       if (isDevelopmentMode) {
-        return [
+        // 모의 사용자 데이터
+        const mockUsers = [
           {
             id: 'user-1',
             email: 'nurse1@hospital.com',
             full_name: '김간호사',
             department: '외과',
-            role: 'RN',
+            role: 'user',
             created_at: '2024-01-10T09:00:00Z',
             last_sign_in_at: '2024-01-15T08:30:00Z',
+            activity_count: 45,
+            last_activity_date: '2024-01-15',
+            email_confirmed_at: '2024-01-10T09:00:00Z',
+            user_metadata: { full_name: '김간호사', role: 'user' },
           },
           {
-            id: 'user-2', 
+            id: 'user-2',
             email: 'nurse2@hospital.com',
             full_name: '이간호사',
             department: '내과',
-            role: 'RN',
+            role: 'user',
             created_at: '2024-01-12T14:20:00Z',
             last_sign_in_at: '2024-01-14T16:15:00Z',
+            activity_count: 32,
+            last_activity_date: '2024-01-14',
+            email_confirmed_at: '2024-01-12T14:20:00Z',
+            user_metadata: { full_name: '이간호사', role: 'user' },
           },
           {
             id: 'user-3',
@@ -137,12 +177,73 @@ export const adminRouter = createTRPCRouter({
             role: 'admin',
             created_at: '2024-01-08T10:00:00Z',
             last_sign_in_at: '2024-01-15T09:00:00Z',
+            activity_count: 0,
+            last_activity_date: null,
+            email_confirmed_at: '2024-01-08T10:00:00Z',
+            user_metadata: { full_name: '관리자', role: 'admin' },
+          },
+          {
+            id: 'user-4',
+            email: 'doctor1@hospital.com',
+            full_name: '박의사',
+            department: '외과',
+            role: 'user',
+            created_at: '2024-01-05T14:00:00Z',
+            last_sign_in_at: '2024-01-14T11:20:00Z',
+            activity_count: 28,
+            last_activity_date: '2024-01-14',
+            email_confirmed_at: '2024-01-05T14:00:00Z',
+            user_metadata: { full_name: '박의사', role: 'user' },
+          },
+          {
+            id: 'user-5',
+            email: 'resident1@hospital.com',
+            full_name: '최레지던트',
+            department: '내과',
+            role: 'user',
+            created_at: '2024-01-15T08:30:00Z',
+            last_sign_in_at: '2024-01-15T16:45:00Z',
+            activity_count: 15,
+            last_activity_date: '2024-01-15',
+            email_confirmed_at: '2024-01-15T08:30:00Z',
+            user_metadata: { full_name: '최레지던트', role: 'user' },
           },
         ];
+
+        // 검색 필터 적용
+        let filteredUsers = mockUsers;
+        if (search) {
+          filteredUsers = mockUsers.filter(user => 
+            user.email.toLowerCase().includes(search.toLowerCase()) ||
+            user.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+            user.department?.toLowerCase().includes(search.toLowerCase())
+          );
+        }
+
+        // 페이지네이션 적용
+        const paginatedUsers = filteredUsers.slice(offset, offset + limit);
+
+        return {
+          users: paginatedUsers,
+          totalCount: filteredUsers.length,
+          hasMore: offset + limit < filteredUsers.length,
+        };
       }
 
       try {
-        const { data: users } = await ctx.supabase
+        // 전체 사용자 수 조회 (검색 필터 적용)
+        let countQuery = ctx.supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true });
+
+        if (search) {
+          countQuery = countQuery.or(`full_name.ilike.%${search}%,department.ilike.%${search}%`);
+        }
+
+        const { count: totalCount } = await countQuery;
+
+        // 페이지네이션된 사용자 데이터 조회
+        let usersQuery = ctx.supabase
           .from('profiles')
           .select(`
             id,
@@ -151,9 +252,34 @@ export const adminRouter = createTRPCRouter({
             role,
             created_at
           `)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
 
-        return users || [];
+        if (search) {
+          usersQuery = usersQuery.or(`full_name.ilike.%${search}%,department.ilike.%${search}%`);
+        }
+
+        const { data: users } = await usersQuery;
+
+        // 사용자 데이터에 추가 속성 포함
+        const enrichedUsers = (users || []).map(user => ({
+          ...user,
+          email: `${user.full_name}@hospital.com`, // 실제로는 auth.users에서 가져와야 함
+          last_sign_in_at: user.created_at, // 기본값으로 생성일 사용
+          activity_count: 0, // 실제로는 logs 테이블에서 계산해야 함
+          last_activity_date: null, // 실제로는 logs 테이블에서 계산해야 함
+          email_confirmed_at: user.created_at, // 기본값으로 생성일 사용
+          user_metadata: {
+            full_name: user.full_name,
+            role: user.role || 'user',
+          },
+        }));
+
+        return {
+          users: enrichedUsers,
+          totalCount: totalCount || 0,
+          hasMore: offset + limit < (totalCount || 0),
+        };
       } catch (error) {
         console.error('사용자 목록 조회 오류:', error);
         throw new Error('사용자 목록을 조회할 수 없습니다.');
@@ -190,12 +316,63 @@ export const adminRouter = createTRPCRouter({
       };
     }),
 
+  // 시스템 설정 조회
+  getSystemSettings: protectedProcedure
+    .query(async ({ ctx }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        return { 
+          siteName: 'CareerLog',
+          siteDescription: '의료진을 위한 커리어 관리 플랫폼',
+          allowUserRegistration: true,
+          requireEmailVerification: true,
+          maxLogsPerUser: 1000,
+          maxFileUploadSize: 10,
+          enableNotifications: true,
+          maintenanceMode: false,
+          systemVersion: '2.1.0',
+          lastBackup: '2024-01-20T02:00:00Z',
+          storageUsed: 1250,
+          storageLimit: 5000,
+        };
+      }
+
+      // 실제 환경에서는 설정 데이터를 Supabase에서 조회
+      return {
+        siteName: 'CareerLog',
+        siteDescription: '의료진을 위한 커리어 관리 플랫폼',
+        allowUserRegistration: true,
+        requireEmailVerification: true,
+        maxLogsPerUser: 1000,
+        maxFileUploadSize: 10,
+        enableNotifications: true,
+        maintenanceMode: false,
+        systemVersion: '2.1.0',
+        lastBackup: new Date().toISOString(),
+        storageUsed: 0,
+        storageLimit: 5000,
+      };
+    }),
+
   // 시스템 설정 업데이트
   updateSystemSettings: protectedProcedure
     .input(z.object({
-      maintenance_mode: z.boolean().optional(),
-      max_users: z.number().optional(),
-      backup_frequency: z.string().optional(),
+      siteName: z.string().optional(),
+      siteDescription: z.string().optional(),
+      allowUserRegistration: z.boolean().optional(),
+      requireEmailVerification: z.boolean().optional(),
+      maxLogsPerUser: z.number().optional(),
+      maxFileUploadSize: z.number().optional(),
+      enableNotifications: z.boolean().optional(),
+      maintenanceMode: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       // 개발 모드 확인
