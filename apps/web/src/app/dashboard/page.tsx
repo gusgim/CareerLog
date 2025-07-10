@@ -218,12 +218,15 @@ export default function DashboardPage() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/setup-admin" className="w-full cursor-pointer">
-                        <Crown className="h-4 w-4 mr-2 text-purple-600" />
-                        <span className="korean-text text-purple-600">초기 관리자 설정</span>
-                      </Link>
-                    </DropdownMenuItem>
+                    {/* 초기 관리자 설정 - 개발 환경에서만 표시 */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/setup-admin" className="w-full cursor-pointer">
+                          <Crown className="h-4 w-4 mr-2 text-purple-600" />
+                          <span className="korean-text text-purple-600">초기 관리자 설정 (개발용)</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

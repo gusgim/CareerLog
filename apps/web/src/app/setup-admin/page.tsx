@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,20 @@ export default function SetupAdminPage() {
   const { createAdminAccount } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+
+  // 🔒 보안 검사: 운영 환경에서는 접근 차단
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') {
+      toast({
+        title: "🚫 접근 거부",
+        description: "운영 환경에서는 이 페이지에 접근할 수 없습니다.",
+        variant: "destructive",
+        duration: 5000,
+      })
+      router.push("/")
+      return
+    }
+  }, [router, toast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

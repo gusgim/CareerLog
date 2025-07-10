@@ -196,22 +196,24 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 초기 관리자 설정 링크 */}
-        <div className="text-center">
-          <Link href="/setup-admin">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 transition-all duration-200"
-            >
-              <span className="text-lg mr-2">👑</span>
-              <span className="korean-text text-sm">시스템 첫 관리자 설정</span>
-            </Button>
-          </Link>
-          <p className="mt-2 text-xs text-white/70 korean-text">
-            처음 사용하시는 경우 관리자 계정을 먼저 생성하세요
-          </p>
-        </div>
+        {/* 초기 관리자 설정 링크 - 개발 환경에서만 표시 */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-center">
+            <Link href="/setup-admin">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 transition-all duration-200"
+              >
+                <span className="text-lg mr-2">👑</span>
+                <span className="korean-text text-sm">시스템 첫 관리자 설정</span>
+              </Button>
+            </Link>
+            <p className="mt-2 text-xs text-white/70 korean-text">
+              개발 환경에서만 표시됩니다. 운영 환경에서는 숨겨집니다.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
