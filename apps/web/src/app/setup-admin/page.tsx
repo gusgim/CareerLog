@@ -22,12 +22,15 @@ export default function SetupAdminPage() {
   const { toast } = useToast()
   const router = useRouter()
 
-  // 🔒 보안 검사: 운영 환경에서는 접근 차단
+  // 🔒 보안 검사: 특정 조건에서만 접근 허용
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production') {
+    const isAccessAllowed = process.env.NODE_ENV === 'development' || 
+                           process.env.NEXT_PUBLIC_ENABLE_ADMIN_SETUP === 'true'
+    
+    if (!isAccessAllowed) {
       toast({
         title: "🚫 접근 거부",
-        description: "운영 환경에서는 이 페이지에 접근할 수 없습니다.",
+        description: "관리자 계정 생성 기능이 비활성화되어 있습니다.",
         variant: "destructive",
         duration: 5000,
       })

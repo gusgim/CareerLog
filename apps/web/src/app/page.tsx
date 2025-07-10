@@ -196,8 +196,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 초기 관리자 설정 링크 - 개발 환경에서만 표시 */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* 초기 관리자 설정 링크 - 개발 환경 또는 환경변수 활성화 시 표시 */}
+        {(process.env.NODE_ENV === 'development' || 
+          process.env.NEXT_PUBLIC_ENABLE_ADMIN_SETUP === 'true') && (
           <div className="text-center">
             <Link href="/setup-admin">
               <Button
@@ -210,7 +211,9 @@ export default function HomePage() {
               </Button>
             </Link>
             <p className="mt-2 text-xs text-white/70 korean-text">
-              개발 환경에서만 표시됩니다. 운영 환경에서는 숨겨집니다.
+              {process.env.NODE_ENV === 'development' 
+                ? '개발 환경에서만 표시됩니다.' 
+                : '임시 관리자 생성 모드 활성화'}
             </p>
           </div>
         )}
