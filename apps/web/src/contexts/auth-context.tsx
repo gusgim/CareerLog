@@ -12,6 +12,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData?: { full_name?: string }) => Promise<{ error?: string }>
   createAdminAccount: (email: string, password: string, adminData: { full_name: string, admin_level?: string }) => Promise<{ error?: string }>
   resendVerificationEmail: (email: string) => Promise<{ error?: string }>
+  resetPassword: (email: string) => Promise<{ error?: string }>
+  updatePassword: (password: string) => Promise<{ error?: string }>
   signOut: () => Promise<void>
 }
 
@@ -415,6 +417,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const resetPassword = async (email: string) => {
+    try {
+      // 환경 변수 확인
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      // 개발 모드: 실제 Supabase 없이 테스트
+      if (!supabaseUrl || !supabaseKey || 
+          supabaseUrl.includes('your_supabase_url_here') || 
+          supabaseKey.includes('your_supabase_anon_key_here')) {
+        
+        console.log('개발 모드: 비밀번호 재설정 이메일 발송 기능은 모의 환경에서만 동작합니다.')
+        return {}
+      }
+
+      const supabase = createClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+
+      if (error) {
+        if (error.message.includes('User not found')) {
+          return { error: "해당 이메일로 가입된 계정을 찾을 수 없습니다." }
+        }
+        return { error: error.message }
+      }
+
+      return {}
+    } catch (error) {
+      console.error('비밀번호 재설정 상세 에러:', error)
+      
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        return { 
+          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
+        }
+      }
+      
+      return { error: "비밀번호 재설정 이메일 발송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+    }
+  }
+
+  const updatePassword = async (password: string) => {
+    try {
+      // 환경 변수 확인
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      // 개발 모드: 실제 Supabase 없이 테스트
+      if (!supabaseUrl || !supabaseKey || 
+          supabaseUrl.includes('your_supabase_url_here') || 
+          supabaseKey.includes('your_supabase_anon_key_here')) {
+        
+        console.log('개발 모드: 비밀번호 업데이트 기능은 모의 환경에서만 동작합니다.')
+        return {}
+      }
+
+      const supabase = createClient()
+      const { error } = await supabase.auth.updateUser({ 
+        password: password 
+      })
+
+      if (error) {
+        if (error.message.includes('New password should be different')) {
+          return { error: "새 비밀번호는 기존 비밀번호와 달라야 합니다." }
+        }
+        if (error.message.includes('Password')) {
+          return { error: "비밀번호는 6자 이상이어야 합니다." }
+        }
+        return { error: error.message }
+      }
+
+      return {}
+    } catch (error) {
+      console.error('비밀번호 업데이트 상세 에러:', error)
+      
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        return { 
+          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
+        }
+      }
+      
+      return { error: "비밀번호 업데이트 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+    }
+  }
+
   const signOut = async () => {
     try {
       // 개발 모드가 아닌 경우에만 Supabase 로그아웃 호출
@@ -444,6 +531,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     createAdminAccount,
     resendVerificationEmail,
+    resetPassword,
+    updatePassword,
     signOut,
   }
 

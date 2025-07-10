@@ -135,9 +135,17 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="korean-text font-medium">
-                  비밀번호
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="korean-text font-medium">
+                    비밀번호
+                  </Label>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-blue-600 hover:text-blue-500 transition-colors korean-text"
+                  >
+                    비밀번호를 잊으셨나요?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

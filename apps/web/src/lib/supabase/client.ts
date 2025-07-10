@@ -19,12 +19,25 @@ export function createClient() {
     console.warn('   NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co')
     console.warn('   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_anon_key')
     
-    // 에러를 던져서 문제를 명확히 표시
-    throw new Error('Supabase 환경 변수가 설정되지 않았습니다. Vercel 환경 변수를 확인해주세요.')
+    // 개발 모드로 전환
+    console.warn('⚠️  개발 모드로 전환합니다. 실제 인증은 동작하지 않습니다.')
+    return createBrowserClient(
+      'https://localhost-fallback.supabase.co',
+      'localhost-fallback-key'
+    )
   }
 
-  console.log('✅ Supabase 클라이언트 초기화 성공')
-  return createBrowserClient(supabaseUrl, supabaseKey)
+  try {
+    console.log('✅ Supabase 클라이언트 초기화 성공')
+    return createBrowserClient(supabaseUrl, supabaseKey)
+  } catch (error) {
+    console.error('❌ Supabase 클라이언트 초기화 실패:', error)
+    console.warn('⚠️  Fallback 모드로 전환합니다.')
+    return createBrowserClient(
+      'https://localhost-fallback.supabase.co',
+      'localhost-fallback-key'
+    )
+  }
 }
 
 export const supabase = createClient() 
