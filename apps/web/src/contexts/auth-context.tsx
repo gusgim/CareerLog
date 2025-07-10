@@ -423,30 +423,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       
+      console.log('🔍 비밀번호 재설정 요청 시작:', { email })
+      console.log('🔍 환경 변수 확인:', {
+        url: supabaseUrl,
+        hasKey: !!supabaseKey,
+        keyPrefix: supabaseKey ? supabaseKey.substring(0, 10) + '...' : 'undefined'
+      })
+      
       // 개발 모드: 실제 Supabase 없이 테스트
       if (!supabaseUrl || !supabaseKey || 
           supabaseUrl.includes('your_supabase_url_here') || 
           supabaseKey.includes('your_supabase_anon_key_here')) {
         
-        console.log('개발 모드: 비밀번호 재설정 이메일 발송 기능은 모의 환경에서만 동작합니다.')
-        return {}
+        console.log('⚠️ 개발 모드 감지: 비밀번호 재설정 이메일 발송 기능은 모의 환경에서만 동작합니다.')
+        return { error: "개발 모드에서는 이메일이 발송되지 않습니다. 프로덕션 환경에서 시도해주세요." }
       }
 
+      console.log('✅ 프로덕션 모드 확인됨, Supabase 이메일 발송 시도 중...')
+      
       const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
+      console.log('📧 Supabase resetPasswordForEmail 응답:', { 
+        error: error ? error.message : null,
+        redirectTo: `${window.location.origin}/auth/reset-password`
+      })
+
       if (error) {
+        console.error('❌ 비밀번호 재설정 이메일 발송 실패:', error)
         if (error.message.includes('User not found')) {
           return { error: "해당 이메일로 가입된 계정을 찾을 수 없습니다." }
         }
         return { error: error.message }
       }
 
+      console.log('✅ 비밀번호 재설정 이메일 발송 성공!')
       return {}
     } catch (error) {
-      console.error('비밀번호 재설정 상세 에러:', error)
+      console.error('💥 비밀번호 재설정 상세 에러:', error)
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         return { 
