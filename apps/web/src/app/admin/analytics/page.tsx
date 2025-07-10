@@ -20,6 +20,7 @@ import {
   Shield
 } from "lucide-react"
 import Link from "next/link"
+import { SurgeryRoomAnalytics } from "@/components/surgery-room-analytics"
 
 export default function AnalyticsPage() {
   const { user, isAdmin } = useAuth()
@@ -379,6 +380,11 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
+        {/* 수술방 근무 빈도 분석 */}
+        <div className="mt-8">
+          <SurgeryRoomAnalytics />
+        </div>
+
         {/* 인사이트 및 요약 */}
         <Card className="border-0 shadow-lg mt-8">
           <CardHeader>
@@ -397,13 +403,13 @@ export default function AnalyticsPage() {
                   </li>
                   <li className="korean-text">
                     • 활성 사용자 비율이 {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%로 
-                    {stats.activeUsers / stats.totalUsers > 0.7 ? ' 매우 우수합니다' : ' 개선이 필요합니다'}
+                    {(stats.totalUsers > 0 && stats.activeUsers / stats.totalUsers > 0.7) ? ' 매우 우수합니다' : ' 개선이 필요합니다'}
                   </li>
                   <li className="korean-text">
-                    • 이번 달 사용자 증가율이 {stats.monthlyGrowth.userGrowth}%를 기록했습니다
+                    • 시스템이 안정적으로 운영되고 있습니다
                   </li>
                   <li className="korean-text">
-                    • 활동 기록률이 전월 대비 {stats.monthlyGrowth.activityGrowth}% 증가했습니다
+                    • 수술방 근무 빈도 분석 기능을 통해 운영 효율성을 개선할 수 있습니다
                   </li>
                 </ul>
               </div>
@@ -412,13 +418,13 @@ export default function AnalyticsPage() {
                 <h3 className="font-semibold text-lg korean-text">💡 개선 권장사항</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="korean-text">
-                    • {stats.categoryStats[0]?.category || '수술'} 활동이 가장 활발합니다 ({stats.categoryStats[0]?.percentage || 30}%)
+                    • 수술방별 근무 패턴을 분석하여 업무 효율성을 높이세요
                   </li>
                   <li className="korean-text">
                     • 사용자 참여도 향상을 위한 리마인더 시스템 도입을 고려해보세요
                   </li>
                   <li className="korean-text">
-                    • 보고서 생성 기능의 활용도가 {stats.monthlyGrowth.reportGrowth}% 증가했습니다
+                    • 근무 빈도가 높은 직원들의 피로도 관리에 주의하세요
                   </li>
                   <li className="korean-text">
                     • 모바일 앱 사용성 개선으로 더 많은 활동 기록을 유도할 수 있습니다
