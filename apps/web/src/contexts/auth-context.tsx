@@ -115,6 +115,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           supabaseUrl.includes('your_supabase_url_here') || 
           supabaseKey.includes('your_supabase_anon_key_here')) {
         
+        // 🔍 기존 저장된 계정 확인
+        const existingSession = localStorage.getItem('dev-user-session')
+        if (existingSession) {
+          try {
+            const existingUser = JSON.parse(existingSession)
+            // 이메일이 일치하면 기존 계정으로 로그인
+            if (existingUser.email === email) {
+              console.log('🔍 기존 저장된 계정으로 로그인:', existingUser)
+              setUser(existingUser)
+              return {}
+            }
+          } catch (e) {
+            console.error('저장된 세션 파싱 오류:', e)
+          }
+        }
+        
+        // 새로운 모의 계정 생성
         const mockUser = {
           id: 'dev-user-' + Date.now(),
           email,
@@ -344,6 +361,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 관리자 권한 확인
   const isAdmin = user?.user_metadata?.role === 'admin'
+  
+  // 🔍 디버깅: 사용자 정보 확인
+  console.log('🔍 현재 사용자 정보:', {
+    user: user,
+    user_metadata: user?.user_metadata,
+    role: user?.user_metadata?.role,
+    isAdmin: isAdmin
+  })
 
   const value = {
     user,
