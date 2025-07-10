@@ -1,0 +1,34 @@
+{
+  "name": "careerlog-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CareeLog - Personal Career & Performance Consultant",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "deploy": "npm run build && echo 'Build completed. Ready for deployment!'",
+    "deploy:vercel": "vercel --prod",
+    "db:migrate": "cd packages/db && npx prisma migrate dev",
+    "db:generate": "cd packages/db && npx prisma generate",
+    "db:studio": "cd packages/db && npx prisma studio"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "turbo": "^1.10.0",
+    "typescript": "^5.2.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.50.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+} 

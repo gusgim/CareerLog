@@ -1,0 +1,15 @@
+{
+  "name": "@careerlog/db",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate": "supabase gen types typescript --local > types/database.ts",
+    "migrate": "supabase db reset --local",
+    "seed": "supabase seed --local"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "supabase": "^1.100.0",
+    "typescript": "^5.2.0"
+  }
+} 

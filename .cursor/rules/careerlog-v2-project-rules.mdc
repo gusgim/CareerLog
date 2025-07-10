@@ -1,0 +1,72 @@
+---
+alwaysApply: true
+---
+# Project: CareeLog - Personal Career & Performance Consultant
+
+## 1. Core Technology Stack (Non-Negotiable)
+- **Primary Framework:** Next.js 14 with the App Router. All new pages and layouts must be created in the `/app` directory. Use Server Components by default and 'use client' only when necessary.
+- **Mobile Framework:** React Native with Expo. Share logic and types from the web app wherever possible.
+- **Backend & Database:** **Supabase** is the single source of truth.
+    - All database operations MUST use the Supabase JavaScript client (`@supabase/supabase-js`).
+    - All authentication MUST use Supabase Auth (email/password, social logins).
+    - All file uploads (e.g., certificates) MUST use Supabase Storage.
+- **Styling:** **Tailwind CSS** and **shadcn/ui**.
+    - Do not use plain CSS, CSS-in-JS (like styled-components), or other component libraries (like Material-UI).
+    - All components should be built using shadcn/ui primitives (`Button`, `Card`, `Input`, `Dialog`, etc.) and styled with Tailwind utility classes. Use the `cn()` utility for merging classes.
+- **API & Type Safety:** **tRPC** with **Zod** for validation. Create end-to-end typesafe API routes. Do not create traditional REST API endpoints unless specifically instructed.
+
+## 2. Database & Schema
+- The primary database table is `logs`. The schema defined in the PRD is the ground truth.
+- Key columns are: `id`, `user_id`, `log_date`, `category`, `subcategory`, `details`, `tags`, `attachments`, `metadata`. Adhere strictly to these names.
+- User profiles are stored in a `profiles` table that links to the `auth.users` table via a foreign key relationship.
+- Always implement and respect Supabase's Row Level Security (RLS) policies. A user must only be able to access their own data.
+
+## 3. Project Structure & Terminology
+- The project is a monorepo with `/apps` (for web/mobile) and `/packages` (for shared code like `ui`, `db`, `api-types`).
+- The core domain object is a "Log" or "Activity". Users "create a Log". These logs are compiled into a "Report". Use this terminology in variable names, comments, and UI text.
+- Example Component Path: `packages/ui/src/components/LogCard.tsx`
+- Example API Route: `apps/web/src/app/api/trpc/[trpc]/route.ts`
+
+## 4. State Management
+- For client-side state, start with React's built-in hooks (`useState`, `useContext`, `useReducer`).
+- For managing server state (fetching, caching, mutating data), use **TanStack Query (React Query)**. It integrates perfectly with tRPC. Do not use Redux, Zustand, or other global state managers for server state.
+
+## 5. Key Features Implementation
+- **Logging:** The "Quick Log" form should be a reusable component, likely a Dialog/Modal from shadcn/ui.
+- **Reporting:** PDF generation must be handled server-side within a Next.js Route Handler or a Supabase Edge Function using libraries like `react-pdf` or `pdfkit`.
+- **UI:** The main dashboard is a list of `LogCard` components. Each `LogCard` should have a color-coded left border based on its `category`.
+
+## 6. Code Examples & Patterns
+- **Supabase Client Initialization:**
+  ```typescript
+  // lib/supabase/client.ts
+  import { createBrowserClient } from '@supabase/ssr'
+
+  export function createClient() {
+    return createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+
+
+## tRPC Procedure Example:
+  // server/trpc/routers/log.ts
+import { z } from 'zod';
+import { protectedProcedure, router } from '../trpc';
+
+export const logRouter = router({
+  create: protectedProcedure
+    .input(
+      z.object({
+        log_date: z.string().date(),
+        category: z.string(),
+        details: z.string().min(1),
+        // ... other fields
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Supabase logic to insert the log
+      // ...
+    }),
+});
