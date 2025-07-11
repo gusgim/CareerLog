@@ -136,9 +136,9 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="korean-text font-medium">
-                    비밀번호
-                  </Label>
+                <Label htmlFor="password" className="korean-text font-medium">
+                  비밀번호
+                </Label>
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-blue-600 hover:text-blue-500 transition-colors korean-text"
@@ -207,23 +207,23 @@ export default function HomePage() {
         {/* 초기 관리자 설정 링크 - 개발 환경 또는 환경변수 활성화 시 표시 */}
         {(process.env.NODE_ENV === 'development' || 
           process.env.NEXT_PUBLIC_ENABLE_ADMIN_SETUP === 'true') && (
-          <div className="text-center">
-            <Link href="/setup-admin">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 transition-all duration-200"
-              >
-                <span className="text-lg mr-2">👑</span>
-                <span className="korean-text text-sm">시스템 첫 관리자 설정</span>
-              </Button>
-            </Link>
-            <p className="mt-2 text-xs text-white/70 korean-text">
+        <div className="text-center">
+          <Link href="/setup-admin">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 transition-all duration-200"
+            >
+              <span className="text-lg mr-2">👑</span>
+              <span className="korean-text text-sm">시스템 첫 관리자 설정</span>
+            </Button>
+          </Link>
+          <p className="mt-2 text-xs text-white/70 korean-text">
               {process.env.NODE_ENV === 'development' 
                 ? '개발 환경에서만 표시됩니다.' 
                 : '임시 관리자 생성 모드 활성화'}
-            </p>
-          </div>
+          </p>
+        </div>
         )}
       </div>
     </div>

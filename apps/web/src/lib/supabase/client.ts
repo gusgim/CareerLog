@@ -29,7 +29,7 @@ export function createClient() {
 
   try {
     console.log('✅ Supabase 클라이언트 초기화 성공')
-    return createBrowserClient(supabaseUrl, supabaseKey)
+  return createBrowserClient(supabaseUrl, supabaseKey)
   } catch (error) {
     console.error('❌ Supabase 클라이언트 초기화 실패:', error)
     console.warn('⚠️  Fallback 모드로 전환합니다.')
@@ -40,4 +40,4 @@ export function createClient() {
   }
 }
 
-export const supabase = createClient() 
+export const supabase = createClient()
