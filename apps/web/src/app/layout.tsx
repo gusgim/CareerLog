@@ -6,6 +6,7 @@ import { TrpcProvider } from "@/lib/trpc/provider"
 import { ThemeProvider } from "@/providers/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/footer"
+import { Header } from "@/components/header"
 import { cn } from '@/lib/utils'
 
 const inter = Inter({
@@ -36,6 +37,7 @@ export default function RootLayout({
           <TrpcProvider>
             <AuthProvider>
               <div className="relative flex min-h-screen flex-col">
+                <Header />
                 <div className="flex-1">
                   {children}
                 </div>

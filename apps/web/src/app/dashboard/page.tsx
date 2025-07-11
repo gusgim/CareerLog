@@ -1,32 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { QuickLogForm } from "@/components/quick-log-form"
 import { LogCard } from "@/components/log-card"
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { PlusCircle, LogOut, User, Calendar, BarChart3, FileText, Loader2, Shield, Settings, UserPlus, Crown, Users } from "lucide-react"
+import { PlusCircle, Calendar, BarChart3, FileText, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { api } from "@/lib/trpc/provider"
 import { format } from "date-fns"
 import Link from "next/link"
 
 export default function DashboardPage() {
-  const { user, signOut, isAdmin } = useAuth()
+  const { user } = useAuth()
   const { toast } = useToast()
-  const router = useRouter()
   const [showQuickLog, setShowQuickLog] = useState(false)
   const [editingLog, setEditingLog] = useState<any>(null)
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null)
@@ -65,20 +54,7 @@ export default function DashboardPage() {
     }
   )
 
-  const handleSignOut = async () => {
-    await signOut()
-    toast({
-      title: "✅ 로그아웃 완료!",
-      description: "안전하게 로그아웃되었습니다. 메인 화면으로 이동합니다.",
-      variant: "success",
-      duration: 2000,
-    })
-    
-    // 토스트 메시지를 보여준 후 루트 페이지로 리다이렉트
-    setTimeout(() => {
-      router.push("/")
-    }, 2000)
-  }
+
 
   const handleLogSuccess = () => {
     // 편집 모드인지 확인해서 적절한 메시지 표시
@@ -161,104 +137,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* 헤더 */}
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-gray-200/50 dark:border-slate-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                <span className="text-lg font-bold text-white">🏥</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white korean-text">
-                CareerLog
-              </h1>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link href="/calendar">
-                <Button variant="outline" size="sm">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  캘린더 보기
-                </Button>
-              </Link>
-              
-              {/* 관리자 메뉴 */}
-              {isAdmin && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 hover:from-red-100 hover:to-pink-100 text-red-700">
-                      <Shield className="h-4 w-4 mr-2" />
-                      관리자
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="korean-text">관리자 메뉴</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/users" className="w-full cursor-pointer">
-                        <Users className="h-4 w-4 mr-2" />
-                        <span className="korean-text">사용자 관리</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/create-admin" className="w-full cursor-pointer">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        <span className="korean-text">관리자 계정 생성</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/system-settings" className="w-full cursor-pointer">
-                        <Settings className="h-4 w-4 mr-2" />
-                        <span className="korean-text">시스템 설정</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/analytics" className="w-full cursor-pointer">
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        <span className="korean-text">전체 통계</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/detailed-analytics" className="w-full cursor-pointer">
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        <span className="korean-text">세부 통계 대시보드</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {/* 초기 관리자 설정 - 개발 환경에서만 표시 */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/setup-admin" className="w-full cursor-pointer">
-                          <Crown className="h-4 w-4 mr-2 text-purple-600" />
-                          <span className="korean-text text-purple-600">초기 관리자 설정 (개발용)</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              <ThemeToggle />
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                <User className="h-4 w-4" />
-                <span className="korean-text">
-                  {user?.user_metadata?.full_name || user?.email}
-                  {isAdmin && <span className="ml-1 text-red-500">👑</span>}
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="korean-text"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                로그아웃
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* 메인 컨텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">

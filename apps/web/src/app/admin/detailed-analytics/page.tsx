@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Users, BarChart3, User, Calendar, Award, Building, Clock, Settings } from "lucide-react"
+import { Users, BarChart3, User, Calendar, Award, Building, Clock } from "lucide-react"
 import Link from "next/link"
 import { QualificationManagement } from "@/components/qualification-management"
 import { UserAnalytics } from "@/components/user-analytics"
@@ -42,15 +42,15 @@ export default function DetailedAnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* 헤더 */}
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-gray-200/50 dark:border-slate-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      {/* 메인 컨텐츠 */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* 페이지 제목 */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
                 <Button variant="outline" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  대시보드
+                  ← 대시보드
                 </Button>
               </Link>
               <div className="flex items-center space-x-3">
@@ -58,7 +58,7 @@ export default function DetailedAnalyticsPage() {
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white korean-text">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white korean-text">
                     세부 통계 대시보드
                   </h1>
                   <p className="text-sm text-gray-600 dark:text-gray-300 korean-text">
@@ -68,16 +68,10 @@ export default function DetailedAnalyticsPage() {
               </div>
             </div>
             <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
-              <Settings className="h-3 w-3 mr-1" />
               관리자 모드
             </Badge>
           </div>
-        </div>
-      </header>
 
-      {/* 메인 컨텐츠 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
           {/* 소개 섹션 */}
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white korean-text">
@@ -194,34 +188,7 @@ export default function DetailedAnalyticsPage() {
             </TabsContent>
           </Tabs>
 
-          {/* 모든 기능 구현 완료 알림 */}
-          <Card className="glass-effect border-0 shadow-lg bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
-            <CardHeader>
-              <CardTitle className="korean-text flex items-center space-x-2">
-                <span className="text-2xl">🎉</span>
-                <span className="text-green-700 dark:text-green-300">모든 기능 구현 완료!</span>
-              </CardTitle>
-              <CardDescription className="korean-text text-green-600 dark:text-green-400">
-                세부 통계 대시보드의 모든 계획된 기능이 성공적으로 구현되었습니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center space-x-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-                  <Badge className="bg-green-600">✓ 완료</Badge>
-                  <span className="korean-text text-sm">근무자 자격 관리</span>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-                  <Badge className="bg-green-600">✓ 완료</Badge>
-                  <span className="korean-text text-sm">개별 사용자 분석</span>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-                  <Badge className="bg-green-600">✓ 완료</Badge>
-                  <span className="korean-text text-sm">AI 자동 스케줄링</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       </main>
     </div>

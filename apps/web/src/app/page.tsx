@@ -36,37 +36,43 @@ export default function HomePage() {
       const { error } = await signIn(email, password)
 
       if (error) {
+        // 로그인 실패 알림
         toast({
-          title: "❌ 로그인 실패",
-          description: error || "이메일 또는 비밀번호를 확인해주세요.",
+          title: "🚫 로그인에 실패했습니다",
+          description: error.includes("Invalid") 
+            ? "이메일 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요."
+            : error || "로그인 정보를 확인하고 다시 시도해주세요.",
           variant: "destructive",
-          duration: 5000,
+          duration: 6000,
         })
         setLoading(false)
         setIsLoginInProgress(false)
       } else {
+        // 로그인 성공 알림
         toast({
-          title: "✅ 로그인 성공!",
-          description: "CareerLog에 오신 것을 환영합니다! 잠시 후 대시보드로 이동합니다.",
+          title: "🎉 로그인에 성공했습니다!",
+          description: `환영합니다! 잠시 후 대시보드로 자동 이동됩니다.`,
           variant: "success",
-          duration: 4000,
+          duration: 3000,
         })
         
+        // 성공 후 대시보드로 이동
         setTimeout(() => {
           setIsLoginInProgress(false)
           router.push("/dashboard")
-        }, 3000)
+        }, 2500)
         
         setTimeout(() => {
           setLoading(false)
-        }, 2900)
+        }, 2400)
       }
     } catch (error) {
+      // 시스템 오류 알림
       toast({
-        title: "❌ 로그인 오류",
-        description: "시스템 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        title: "⚠️ 시스템 오류가 발생했습니다",
+        description: "네트워크 연결을 확인하고 잠시 후 다시 시도해주세요. 문제가 지속되면 관리자에게 문의하세요.",
         variant: "destructive",
-        duration: 5000,
+        duration: 7000,
       })
       setLoading(false)
       setIsLoginInProgress(false)

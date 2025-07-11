@@ -14,7 +14,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-6 left-1/2 -translate-x-1/2 z-[200] flex max-h-screen w-full max-w-[500px] flex-col p-4",
+      "fixed top-6 right-6 z-[200] flex max-h-screen w-full max-w-[420px] flex-col-reverse p-4 gap-3",
       className
     )}
     {...props}
@@ -23,15 +23,15 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-6 pr-8 shadow-xl transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-top-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-6 pr-8 shadow-2xl transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-right-full data-[state=open]:sm:slide-in-from-right-full backdrop-blur-sm",
   {
     variants: {
       variant: {
         default: "border bg-background text-foreground",
         destructive:
-          "destructive border-red-500 bg-red-50 text-red-900 dark:bg-red-900 dark:text-red-50 shadow-red-200",
+          "destructive border-red-500/60 bg-gradient-to-r from-red-50 to-red-100 text-red-900 dark:from-red-950 dark:to-red-900 dark:text-red-50 shadow-red-300 ring-2 ring-red-200/50 dark:ring-red-800/50",
         success:
-          "border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-900 dark:from-green-900 dark:to-emerald-900 dark:text-green-50 shadow-green-200 ring-2 ring-green-200",
+          "border-green-500/60 bg-gradient-to-r from-green-50 to-emerald-50 text-green-900 dark:from-green-950 dark:to-emerald-950 dark:text-green-50 shadow-green-300 ring-2 ring-green-200/50 dark:ring-green-800/50",
       },
     },
     defaultVariants: {
