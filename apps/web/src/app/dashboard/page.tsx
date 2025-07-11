@@ -217,6 +217,12 @@ export default function DashboardPage() {
                         <span className="korean-text">전체 통계</span>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/detailed-analytics" className="w-full cursor-pointer">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        <span className="korean-text">세부 통계 대시보드</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {/* 초기 관리자 설정 - 개발 환경에서만 표시 */}
                     {process.env.NODE_ENV === 'development' && (

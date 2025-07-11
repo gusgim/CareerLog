@@ -534,10 +534,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // 관리자 권한 확인
-  const isAdmin = user?.user_metadata?.role === 'admin'
+  const isAdmin = isDevelopmentMode ? true : user?.user_metadata?.role === 'admin'
   
   // 관리자 권한 디버깅 (필요시 주석 해제)
-  // console.log('🔍 현재 사용자 정보:', { user, isAdmin })
+  console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode })
 
   const value = {
     user,

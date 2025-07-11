@@ -655,4 +655,863 @@ export const adminRouter = createTRPCRouter({
         throw new Error('수술방 목록을 조회할 수 없습니다.');
       }
     }),
+
+  // === 자격 관리 시스템 ===
+
+  // 모든 자격 유형 조회
+  getAllQualifications: protectedProcedure
+    .query(async ({ ctx }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        return [
+          {
+            id: 1,
+            name: 'OR_BASIC',
+            name_ko: '수술실 기본 자격',
+            description: '수술실 근무를 위한 기본 교육 이수',
+            category: 'training',
+            required_for_rooms: ['OR1', 'OR2', 'OR3', 'OR4', 'OR5', 'OR6'],
+            required_experience_years: 0,
+            is_mandatory: true,
+          },
+          {
+            id: 2,
+            name: 'OR_CARDIAC',
+            name_ko: '심장수술실 자격',
+            description: '심장수술실 근무를 위한 전문 교육',
+            category: 'training',
+            required_for_rooms: ['OR1'],
+            required_experience_years: 6,
+            is_mandatory: true,
+          },
+          {
+            id: 3,
+            name: 'OR_NEURO',
+            name_ko: '신경수술실 자격',
+            description: '신경수술실 근무를 위한 전문 교육',
+            category: 'training',
+            required_for_rooms: ['OR2'],
+            required_experience_years: 5,
+            is_mandatory: true,
+          },
+          {
+            id: 4,
+            name: 'RR_BASIC',
+            name_ko: '회복실 기본 자격',
+            description: '회복실 근무를 위한 기본 교육',
+            category: 'training',
+            required_for_rooms: ['RR1', 'RR2'],
+            required_experience_years: 2,
+            is_mandatory: true,
+          },
+          {
+            id: 5,
+            name: 'CPR_CERTIFICATION',
+            name_ko: 'CPR 인증',
+            description: '심폐소생술 인증',
+            category: 'certification',
+            required_for_rooms: [],
+            required_experience_years: 0,
+            is_mandatory: true,
+          },
+        ];
+      }
+
+      try {
+        const { data: qualifications } = await ctx.supabase
+          .from('qualifications')
+          .select('*')
+          .order('category', { ascending: true })
+          .order('name_ko', { ascending: true });
+
+        return qualifications || [];
+      } catch (error) {
+        console.error('자격 목록 조회 오류:', error);
+        throw new Error('자격 목록을 조회할 수 없습니다.');
+      }
+    }),
+
+  // 근무자별 자격 현황 조회
+  getStaffQualifications: protectedProcedure
+    .input(z.object({
+      userId: z.string().optional(),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        return [
+          {
+            userId: 'user-1',
+            fullName: '김간호사',
+            department: '외과',
+            yearsOfExperience: 8,
+            qualifications: [
+              {
+                id: 1,
+                name: 'OR_BASIC',
+                name_ko: '수술실 기본 자격',
+                obtained_date: '2020-03-15',
+                expiry_date: null,
+                status: 'active',
+              },
+              {
+                id: 2,
+                name: 'OR_CARDIAC',
+                name_ko: '심장수술실 자격',
+                obtained_date: '2022-08-20',
+                expiry_date: null,
+                status: 'active',
+              },
+              {
+                id: 5,
+                name: 'CPR_CERTIFICATION',
+                name_ko: 'CPR 인증',
+                obtained_date: '2024-01-10',
+                expiry_date: '2026-01-10',
+                status: 'active',
+              },
+            ],
+            missingQualifications: [
+              {
+                id: 3,
+                name: 'OR_NEURO',
+                name_ko: '신경수술실 자격',
+                reason: '선택사항',
+              },
+            ],
+          },
+          {
+            userId: 'user-2',
+            fullName: '이간호사',
+            department: '내과',
+            yearsOfExperience: 4,
+            qualifications: [
+              {
+                id: 1,
+                name: 'OR_BASIC',
+                name_ko: '수술실 기본 자격',
+                obtained_date: '2021-06-10',
+                expiry_date: null,
+                status: 'active',
+              },
+              {
+                id: 5,
+                name: 'CPR_CERTIFICATION',
+                name_ko: 'CPR 인증',
+                obtained_date: '2023-11-15',
+                expiry_date: '2025-11-15',
+                status: 'active',
+              },
+            ],
+            missingQualifications: [
+              {
+                id: 2,
+                name: 'OR_CARDIAC',
+                name_ko: '심장수술실 자격',
+                reason: '경력 부족 (6년 이상 필요)',
+              },
+              {
+                id: 3,
+                name: 'OR_NEURO',
+                name_ko: '신경수술실 자격',
+                reason: '경력 부족 (5년 이상 필요)',
+              },
+            ],
+          },
+        ];
+      }
+
+      try {
+        // 실제 환경에서 구현
+        // 복잡한 조인 쿼리가 필요하므로 우선 기본 구조만 제공
+        return [];
+      } catch (error) {
+        console.error('근무자 자격 현황 조회 오류:', error);
+        throw new Error('근무자 자격 현황을 조회할 수 없습니다.');
+      }
+    }),
+
+  // 배치 가능성 매트릭스 조회
+  getPlacementMatrix: protectedProcedure
+    .query(async ({ ctx }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        return {
+          operatingRooms: [
+            { id: 'OR1', name: '수술실 1호 (심장외과)', specialty: 'cardiac' },
+            { id: 'OR2', name: '수술실 2호 (신경외과)', specialty: 'neuro' },
+            { id: 'OR3', name: '수술실 3호 (일반외과)', specialty: 'general' },
+            { id: 'RR1', name: '회복실 A', specialty: 'recovery' },
+          ],
+          staff: [
+            {
+              userId: 'user-1',
+              fullName: '김간호사',
+              department: '외과',
+              yearsOfExperience: 8,
+              placements: {
+                OR1: { canWork: true, reason: '심장수술실 자격 보유' },
+                OR2: { canWork: false, reason: '신경수술실 자격 미보유' },
+                OR3: { canWork: true, reason: '기본 자격 보유' },
+                RR1: { canWork: true, reason: '기본 자격 보유' },
+              },
+            },
+            {
+              userId: 'user-2',
+              fullName: '이간호사',
+              department: '내과',
+              yearsOfExperience: 4,
+              placements: {
+                OR1: { canWork: false, reason: '경력 부족 (6년 이상 필요)' },
+                OR2: { canWork: false, reason: '경력 부족 (5년 이상 필요)' },
+                OR3: { canWork: true, reason: '기본 자격 보유' },
+                RR1: { canWork: true, reason: '기본 자격 보유' },
+              },
+            },
+            {
+              userId: 'user-3',
+              fullName: '박간호사',
+              department: '외과',
+              yearsOfExperience: 7,
+              placements: {
+                OR1: { canWork: true, reason: '심장수술실 자격 보유' },
+                OR2: { canWork: true, reason: '신경수술실 자격 보유' },
+                OR3: { canWork: true, reason: '기본 자격 보유' },
+                RR1: { canWork: true, reason: '기본 자격 보유' },
+              },
+            },
+          ],
+        };
+      }
+
+      try {
+        // 실제 환경에서 구현
+        // 복잡한 매트릭스 계산이 필요하므로 우선 기본 구조만 제공
+        return {
+          operatingRooms: [],
+          staff: [],
+        };
+      } catch (error) {
+        console.error('배치 가능성 매트릭스 조회 오류:', error);
+        throw new Error('배치 가능성 매트릭스를 조회할 수 없습니다.');
+      }
+    }),
+
+  // 자격 추가/수정
+  createOrUpdateQualification: protectedProcedure
+    .input(z.object({
+      id: z.number().optional(),
+      name: z.string().min(1),
+      name_ko: z.string().min(1),
+      description: z.string().optional(),
+      category: z.enum(['education', 'certification', 'experience', 'training']),
+      required_for_rooms: z.array(z.string()).default([]),
+      required_experience_years: z.number().min(0).default(0),
+      is_mandatory: z.boolean().default(false),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        console.log('자격 생성/수정 (개발 모드):', input);
+        return { 
+          success: true, 
+          message: input.id ? '자격이 수정되었습니다.' : '새 자격이 생성되었습니다.',
+          id: input.id || Date.now(),
+        };
+      }
+
+      try {
+        if (input.id) {
+          // 수정
+          const { data, error } = await ctx.supabase
+            .from('qualifications')
+            .update({
+              name: input.name,
+              name_ko: input.name_ko,
+              description: input.description,
+              category: input.category,
+              required_for_rooms: input.required_for_rooms,
+              required_experience_years: input.required_experience_years,
+              is_mandatory: input.is_mandatory,
+            })
+            .eq('id', input.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          return { success: true, message: '자격이 수정되었습니다.', id: data.id };
+        } else {
+          // 생성
+          const { data, error } = await ctx.supabase
+            .from('qualifications')
+            .insert({
+              name: input.name,
+              name_ko: input.name_ko,
+              description: input.description,
+              category: input.category,
+              required_for_rooms: input.required_for_rooms,
+              required_experience_years: input.required_experience_years,
+              is_mandatory: input.is_mandatory,
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          return { success: true, message: '새 자격이 생성되었습니다.', id: data.id };
+        }
+      } catch (error) {
+        console.error('자격 생성/수정 오류:', error);
+        throw new Error('자격을 저장할 수 없습니다.');
+      }
+    }),
+
+  // 근무자 자격 할당/제거
+  assignStaffQualification: protectedProcedure
+    .input(z.object({
+      userId: z.string(),
+      qualificationId: z.number(),
+      obtained_date: z.string().optional(),
+      expiry_date: z.string().optional(),
+      notes: z.string().optional(),
+      remove: z.boolean().default(false),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        console.log('근무자 자격 할당/제거 (개발 모드):', input);
+        return { 
+          success: true, 
+          message: input.remove ? '자격이 제거되었습니다.' : '자격이 할당되었습니다.',
+        };
+      }
+
+      try {
+        if (input.remove) {
+          // 제거
+          const { error } = await ctx.supabase
+            .from('staff_qualifications')
+            .delete()
+            .eq('user_id', input.userId)
+            .eq('qualification_id', input.qualificationId);
+
+          if (error) throw error;
+          return { success: true, message: '자격이 제거되었습니다.' };
+        } else {
+          // 할당
+          const { data, error } = await ctx.supabase
+            .from('staff_qualifications')
+            .upsert({
+              user_id: input.userId,
+              qualification_id: input.qualificationId,
+              obtained_date: input.obtained_date,
+              expiry_date: input.expiry_date,
+              notes: input.notes,
+              status: 'active',
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          return { success: true, message: '자격이 할당되었습니다.' };
+        }
+      } catch (error) {
+        console.error('근무자 자격 할당/제거 오류:', error);
+        throw new Error('자격 할당/제거에 실패했습니다.');
+      }
+    }),
+
+  // === 개별 사용자 분석 시스템 ===
+
+  // 개별 사용자 분석 데이터 조회
+  getUserAnalytics: protectedProcedure
+    .input(z.object({
+      userId: z.string(),
+      period: z.enum(['6', '12', '18', '24']).default('12'), // 개월 수
+    }))
+    .query(async ({ ctx, input }) => {
+      const { userId, period } = input;
+      
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        // 모의 데이터
+        const mockData = {
+          userInfo: {
+            id: userId,
+            fullName: userId === 'user-1' ? '김간호사' : '이간호사',
+            department: '외과',
+            yearsOfExperience: userId === 'user-1' ? 8 : 4,
+            joinDate: userId === 'user-1' ? '2016-03-15' : '2020-06-10',
+          },
+          period: {
+            months: parseInt(period),
+            startDate: new Date(Date.now() - parseInt(period) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+          },
+          dutyStats: [
+            { dutyType: '수술실 근무', count: 45, percentage: 38.5, avgHoursPerShift: 8.2 },
+            { dutyType: '회복실 근무', count: 28, percentage: 23.9, avgHoursPerShift: 7.8 },
+            { dutyType: '주간 근무', count: 32, percentage: 27.4, avgHoursPerShift: 8.0 },
+            { dutyType: '야간 근무', count: 12, percentage: 10.3, avgHoursPerShift: 12.0 },
+          ],
+          operatingRoomStats: [
+            { room: '수술실 1호 (심장외과)', count: 22, percentage: 31.4, lastWorkDate: '2024-01-15' },
+            { room: '수술실 3호 (일반외과)', count: 18, percentage: 25.7, lastWorkDate: '2024-01-14' },
+            { room: '회복실 A', count: 15, percentage: 21.4, lastWorkDate: '2024-01-13' },
+            { room: '수술실 2호 (신경외과)', count: 10, percentage: 14.3, lastWorkDate: '2024-01-10' },
+            { room: '회복실 B', count: 5, percentage: 7.1, lastWorkDate: '2024-01-08' },
+          ],
+          monthlyTrends: [
+            { month: '2023-08', totalShifts: 18, totalHours: 152 },
+            { month: '2023-09', totalShifts: 22, totalHours: 178 },
+            { month: '2023-10', totalShifts: 20, totalHours: 165 },
+            { month: '2023-11', totalShifts: 19, totalHours: 148 },
+            { month: '2023-12', totalShifts: 23, totalHours: 185 },
+            { month: '2024-01', totalShifts: 15, totalHours: 125 }, // 현재 월은 부분 데이터
+          ],
+          performance: {
+            totalShifts: 117,
+            totalHours: 853,
+            avgShiftsPerMonth: 19.5,
+            avgHoursPerMonth: 142.2,
+            attendanceRate: 96.8,
+            overtimeHours: 45,
+          },
+          insights: [
+            {
+              type: 'strength',
+              title: '강점 분야',
+              description: '심장수술실 근무 빈도가 높아 전문성을 갖추고 있습니다.',
+            },
+            {
+              type: 'opportunity',
+              title: '개선 기회',
+              description: '신경수술실 근무 경험이 상대적으로 적어 다양한 경험을 위해 배치를 고려해볼 수 있습니다.',
+            },
+            {
+              type: 'workload',
+              title: '근무 부하',
+              description: '월평균 근무시간이 적정 수준으로 유지되고 있습니다.',
+            },
+          ],
+        };
+
+        return mockData;
+      }
+
+      try {
+        // 실제 환경에서 구현
+        // 복잡한 분석 쿼리가 필요하므로 우선 기본 구조만 제공
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - parseInt(period));
+
+        return {
+          userInfo: {
+            id: userId,
+            fullName: '미구현',
+            department: '미구현',
+            yearsOfExperience: 0,
+            joinDate: '미구현',
+          },
+          period: {
+            months: parseInt(period),
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+          },
+          dutyStats: [],
+          operatingRoomStats: [],
+          monthlyTrends: [],
+          performance: {
+            totalShifts: 0,
+            totalHours: 0,
+            avgShiftsPerMonth: 0,
+            avgHoursPerMonth: 0,
+            attendanceRate: 0,
+            overtimeHours: 0,
+          },
+          insights: [],
+        };
+      } catch (error) {
+        console.error('개별 사용자 분석 조회 오류:', error);
+        throw new Error('사용자 분석 데이터를 조회할 수 없습니다.');
+      }
+    }),
+
+  // 전체 사용자 목록 조회 (분석용)
+  getUsersForAnalysis: protectedProcedure
+    .query(async ({ ctx }) => {
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        return [
+          {
+            id: 'user-1',
+            fullName: '김간호사',
+            department: '외과',
+            yearsOfExperience: 8,
+            lastActivityDate: '2024-01-15',
+          },
+          {
+            id: 'user-2',
+            fullName: '이간호사',
+            department: '내과',
+            yearsOfExperience: 4,
+            lastActivityDate: '2024-01-14',
+          },
+          {
+            id: 'user-3',
+            fullName: '박간호사',
+            department: '외과',
+            yearsOfExperience: 7,
+            lastActivityDate: '2024-01-13',
+          },
+          {
+            id: 'user-4',
+            fullName: '최간호사',
+            department: '내과',
+            yearsOfExperience: 5,
+            lastActivityDate: '2024-01-12',
+          },
+          {
+            id: 'user-5',
+            fullName: '정간호사',
+            department: '외과',
+            yearsOfExperience: 6,
+            lastActivityDate: '2024-01-11',
+          },
+        ];
+      }
+
+      try {
+        // 실제 환경에서 구현
+        const { data: profiles } = await ctx.supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name,
+            department,
+            years_of_experience,
+            created_at
+          `)
+          .order('full_name', { ascending: true });
+
+        return profiles?.map(profile => ({
+          id: profile.id,
+          fullName: profile.full_name || '이름 없음',
+          department: profile.department || '미지정',
+          yearsOfExperience: profile.years_of_experience || 0,
+          lastActivityDate: profile.created_at?.split('T')[0] || '미지정',
+        })) || [];
+      } catch (error) {
+        console.error('사용자 목록 조회 오류:', error);
+        throw new Error('사용자 목록을 조회할 수 없습니다.');
+      }
+    }),
+
+  // === 자동 스케줄링 시스템 ===
+
+  // 스케줄링 알고리즘 실행
+  generateAutoSchedule: protectedProcedure
+    .input(z.object({
+      startDate: z.string(), // YYYY-MM-DD 형식
+      endDate: z.string(),   // YYYY-MM-DD 형식
+      constraints: z.object({
+        maxConsecutiveDays: z.number().default(3),
+        minRestHours: z.number().default(12),
+        maxWeeklyHours: z.number().default(40),
+        preferredDistribution: z.boolean().default(true),
+      }).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { startDate, endDate, constraints = {} } = input;
+      
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        // 모의 스케줄 생성 결과
+        const mockSchedule = {
+          scheduleId: `schedule_${Date.now()}`,
+          period: { startDate, endDate },
+          constraints,
+          generatedAt: new Date().toISOString(),
+          schedules: [
+            {
+              date: startDate,
+              shifts: [
+                {
+                  userId: 'user-1',
+                  userName: '김간호사',
+                  operatingRoom: 'OR1',
+                  dutyType: '수술실 근무',
+                  startTime: '08:00',
+                  endTime: '16:00',
+                  qualificationMatch: 100,
+                },
+                {
+                  userId: 'user-2',
+                  userName: '이간호사',
+                  operatingRoom: 'OR3',
+                  dutyType: '수술실 근무',
+                  startTime: '08:00',
+                  endTime: '16:00',
+                  qualificationMatch: 95,
+                },
+                {
+                  userId: 'user-3',
+                  userName: '박간호사',
+                  operatingRoom: 'RR1',
+                  dutyType: '회복실 근무',
+                  startTime: '16:00',
+                  endTime: '00:00',
+                  qualificationMatch: 100,
+                },
+              ],
+            },
+          ],
+          analysis: {
+            totalScheduledShifts: 21,
+            distributionScore: 92,
+            qualificationMatchScore: 97,
+            workloadBalanceScore: 89,
+            suggestions: [
+              '김간호사의 심장수술실 경험을 활용하여 OR1에 우선 배치했습니다.',
+              '이간호사는 신경수술실 경험이 부족하여 OR2 대신 OR3에 배치했습니다.',
+              '전체 근무자 간 근무시간 분배가 균형있게 조정되었습니다.',
+            ],
+          },
+        };
+
+        return {
+          success: true,
+          message: '자동 스케줄이 성공적으로 생성되었습니다.',
+          schedule: mockSchedule,
+        };
+      }
+
+      try {
+        // 실제 환경에서는 복잡한 스케줄링 알고리즘 실행
+        // 1. 현재 근무자 목록 및 자격 조회
+        // 2. 수술방별 요구사항 확인
+        // 3. 과거 근무 이력 분석
+        // 4. 제약조건 적용
+        // 5. 최적화 알고리즘 실행
+
+        return {
+          success: false,
+          message: '자동 스케줄링 기능은 아직 구현 중입니다.',
+          schedule: null,
+        };
+      } catch (error) {
+        console.error('자동 스케줄링 오류:', error);
+        throw new Error('자동 스케줄 생성에 실패했습니다.');
+      }
+    }),
+
+  // 스케줄 최적화 제안
+  optimizeSchedule: protectedProcedure
+    .input(z.object({
+      scheduleId: z.string(),
+      optimizationGoals: z.array(z.enum(['workload', 'qualification', 'preference', 'experience'])).default(['workload']),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { scheduleId, optimizationGoals } = input;
+      
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        const mockOptimization = {
+          originalScheduleId: scheduleId,
+          optimizedScheduleId: `optimized_${Date.now()}`,
+          optimizationGoals,
+          improvements: [
+            {
+              type: 'workload',
+              description: '김간호사와 이간호사의 근무시간 차이를 8시간에서 4시간으로 줄였습니다.',
+              impact: 'high',
+            },
+            {
+              type: 'qualification',
+              description: '자격 요건 매치 점수가 94%에서 98%로 향상되었습니다.',
+              impact: 'medium',
+            },
+            {
+              type: 'experience',
+              description: '신규 간호사에게 다양한 수술방 경험 기회를 3회 추가 제공했습니다.',
+              impact: 'medium',
+            },
+          ],
+          stats: {
+            beforeScore: 87,
+            afterScore: 94,
+            improvementPercentage: 8.0,
+          },
+        };
+
+        return {
+          success: true,
+          message: '스케줄이 성공적으로 최적화되었습니다.',
+          optimization: mockOptimization,
+        };
+      }
+
+      try {
+        // 실제 환경에서 최적화 로직 실행
+        return {
+          success: false,
+          message: '스케줄 최적화 기능은 아직 구현 중입니다.',
+          optimization: null,
+        };
+      } catch (error) {
+        console.error('스케줄 최적화 오류:', error);
+        throw new Error('스케줄 최적화에 실패했습니다.');
+      }
+    }),
+
+  // 응급 상황 대응 스케줄링
+  handleEmergencyScheduling: protectedProcedure
+    .input(z.object({
+      date: z.string(),
+      operatingRoom: z.string(),
+      requiredQualifications: z.array(z.string()).default([]),
+      urgencyLevel: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { date, operatingRoom, requiredQualifications, urgencyLevel } = input;
+      
+      // 개발 모드 확인
+      const isDevelopmentMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                               process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your_supabase_url_here');
+
+      // 관리자 권한 확인 (개발 모드에서는 더 관대하게)
+      if (!isDevelopmentMode && ctx.user?.user_metadata?.role !== 'admin') {
+        throw new Error('관리자 권한이 필요합니다.');
+      }
+
+      if (isDevelopmentMode) {
+        const mockEmergencyResponse = {
+          requestId: `emergency_${Date.now()}`,
+          date,
+          operatingRoom,
+          urgencyLevel,
+          availableStaff: [
+            {
+              userId: 'user-1',
+              userName: '김간호사',
+              qualificationMatch: 100,
+              currentStatus: 'available',
+              responseTime: '즉시 가능',
+              lastRestHours: 16,
+            },
+            {
+              userId: 'user-3',
+              userName: '박간호사',
+              qualificationMatch: 95,
+              currentStatus: 'on_call',
+              responseTime: '15분 내',
+              lastRestHours: 8,
+            },
+          ],
+          recommendation: {
+            primaryChoice: {
+              userId: 'user-1',
+              userName: '김간호사',
+              reason: '해당 수술방 전문 자격을 보유하고 있으며 충분한 휴식을 취한 상태입니다.',
+            },
+            backupChoices: [
+              {
+                userId: 'user-3',
+                userName: '박간호사',
+                reason: '당직 중이며 필요 자격을 보유하고 있습니다.',
+              },
+            ],
+          },
+        };
+
+        return {
+          success: true,
+          message: '응급 상황 대응 스케줄이 생성되었습니다.',
+          emergency: mockEmergencyResponse,
+        };
+      }
+
+      try {
+        // 실제 환경에서 응급 상황 대응 로직 실행
+        return {
+          success: false,
+          message: '응급 상황 대응 기능은 아직 구현 중입니다.',
+          emergency: null,
+        };
+      } catch (error) {
+        console.error('응급 스케줄링 오류:', error);
+        throw new Error('응급 상황 대응에 실패했습니다.');
+      }
+    }),
 }); 
