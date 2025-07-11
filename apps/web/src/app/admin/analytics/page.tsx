@@ -20,7 +20,7 @@ import {
   Shield
 } from "lucide-react"
 import Link from "next/link"
-import { SurgeryRoomAnalytics } from "@/components/surgery-room-analytics"
+
 
 export default function AnalyticsPage() {
   const { user, isAdmin } = useAuth()
@@ -380,10 +380,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* 수술방 근무 빈도 분석 */}
-        <div className="mt-8">
-          <SurgeryRoomAnalytics />
-        </div>
+
 
         {/* 인사이트 및 요약 */}
         <Card className="border-0 shadow-lg mt-8">
@@ -409,7 +406,7 @@ export default function AnalyticsPage() {
                     • 시스템이 안정적으로 운영되고 있습니다
                   </li>
                   <li className="korean-text">
-                    • 수술방 근무 빈도 분석 기능을 통해 운영 효율성을 개선할 수 있습니다
+                    • 세부 통계 대시보드를 통해 운영 효율성을 개선할 수 있습니다
                   </li>
                 </ul>
               </div>
@@ -418,7 +415,7 @@ export default function AnalyticsPage() {
                 <h3 className="font-semibold text-lg korean-text">💡 개선 권장사항</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="korean-text">
-                    • 수술방별 근무 패턴을 분석하여 업무 효율성을 높이세요
+                    • 세부 통계 대시보드에서 근무 패턴을 분석하여 업무 효율성을 높이세요
                   </li>
                   <li className="korean-text">
                     • 사용자 참여도 향상을 위한 리마인더 시스템 도입을 고려해보세요

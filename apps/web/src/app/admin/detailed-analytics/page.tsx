@@ -11,6 +11,7 @@ import Link from "next/link"
 import { QualificationManagement } from "@/components/qualification-management"
 import { UserAnalytics } from "@/components/user-analytics"
 import { AutoScheduling } from "@/components/auto-scheduling"
+import { SurgeryRoomAnalytics } from "@/components/surgery-room-analytics"
 
 export default function DetailedAnalyticsPage() {
   const { isAdmin } = useAuth()
@@ -151,21 +152,7 @@ export default function DetailedAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                      <h4 className="font-semibold text-blue-800 dark:text-blue-300 korean-text mb-2">
-                        📊 현재 구현된 기능
-                      </h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-400 korean-text">
-                        기존 수술방 분석 기능이 이미 구현되어 있습니다. "전체 통계" 메뉴에서 확인할 수 있습니다.
-                      </p>
-                      <Link href="/admin/analytics" className="inline-block mt-2">
-                        <Button size="sm" variant="outline" className="korean-text">
-                          수술방 분석 보러가기
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
+                  <SurgeryRoomAnalytics />
                 </CardContent>
               </Card>
             </TabsContent>
