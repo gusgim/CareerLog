@@ -155,13 +155,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // 🔧 Supabase 인증 시도 with 폴백
       try {
-        const supabase = createClient()
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-        if (error) {
+      if (error) {
           // 400 에러나 API 키 관련 에러 시 개발 모드로 폴백
           if (error.message.includes('API key') || 
               error.message.includes('Invalid API key') ||
@@ -196,16 +196,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           // 일반적인 인증 에러
-          if (error.message.includes('Invalid login credentials')) {
-            return { error: "이메일 또는 비밀번호가 잘못되었습니다." }
-          }
-          if (error.message.includes('Email not confirmed')) {
-            return { error: "이메일 인증을 완료해주세요." }
-          }
-          return { error: error.message }
+        if (error.message.includes('Invalid login credentials')) {
+          return { error: "이메일 또는 비밀번호가 잘못되었습니다." }
         }
+        if (error.message.includes('Email not confirmed')) {
+          return { error: "이메일 인증을 완료해주세요." }
+        }
+        return { error: error.message }
+      }
 
-        return {}
+      return {}
       } catch (supabaseError) {
         console.warn('🔧 Supabase 연결 오류 - 개발 모드로 전환:', supabaseError)
         
@@ -533,11 +533,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }
 
-  // 관리자 권한 확인
-  const isAdmin = isDevelopmentMode ? true : user?.user_metadata?.role === 'admin'
+  // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
+  const isAdmin = isDevelopmentMode ? true : 
+    (user?.user_metadata?.role === 'admin' || user?.email === 'gisugim0407@gmail.com')
   
   // 관리자 권한 디버깅 (필요시 주석 해제)
-  console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode })
+  console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode, email: user?.email })
 
   const value = {
     user,

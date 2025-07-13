@@ -404,6 +404,71 @@ export default function SystemSettingsPage() {
             </CardContent>
           </Card>
 
+          {/* 개발 도구 */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 korean-text">
+                <FileText className="h-5 w-5" />
+                <span>개발 도구</span>
+              </CardTitle>
+              <CardDescription className="korean-text">
+                개발 및 데모를 위한 유틸리티 도구들입니다
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link href="/admin/demo-validation">
+                  <Card className="border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                          <Database className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-blue-900 korean-text">데모 데이터 검증</div>
+                          <div className="text-sm text-blue-600 korean-text">
+                            더미 데이터 상태 확인 및 차트 준비성 검증
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                
+                <Card className="border border-gray-200 bg-gray-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
+                        <HardDrive className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-500 korean-text">데이터 백업 도구</div>
+                        <div className="text-sm text-gray-400 korean-text">
+                          곧 출시 예정
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-blue-800 korean-text mb-1">
+                      💡 데모 데이터 검증 도구
+                    </h4>
+                    <p className="text-sm text-blue-700 korean-text">
+                      생성된 더미 데이터가 모든 차트와 그래프에서 의미있게 표시되는지 자동으로 검증합니다. 
+                      데모 시연 전에 실행하여 준비 상태를 확인하세요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* 주의사항 */}
           <Card className="border-0 shadow-lg border-orange-200 bg-orange-50">
             <CardContent className="p-6">
