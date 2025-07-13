@@ -6,7 +6,6 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { Database } from '@/types/database'
 
 type SupabaseClient = ReturnType<typeof createClient>
 
@@ -19,7 +18,7 @@ interface TestResult {
   data?: any
 }
 
-interface DemoTestSuite {
+export interface DemoTestSuite {
   totalScore: number
   maxScore: number
   results: TestResult[]
@@ -193,7 +192,7 @@ async function testDashboardStats(supabase: SupabaseClient): Promise<TestResult>
     ])
     
     const recentCount = recentLogs.data?.length || 0
-    const categories = [...new Set(categoriesResult.data?.map(l => l.category) || [])]
+    const categories = Array.from(new Set(categoriesResult.data?.map(l => l.category) || []))
     
     let score = 0
     let issues: string[] = []
@@ -454,7 +453,7 @@ async function testChartDataSufficiency(supabase: SupabaseClient): Promise<TestR
     const logs = logsResult.data || []
     
     // 카테고리 분포 체크
-    const categories = [...new Set(logs.map(l => l.category))]
+    const categories = Array.from(new Set(logs.map(l => l.category)))
     const categoryDistribution = categories.map(cat => ({
       category: cat,
       count: logs.filter(l => l.category === cat).length
@@ -618,6 +617,5 @@ export async function quickTest(): Promise<void> {
 
 // 개발 환경에서 글로벌 접근 가능하도록 설정
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).testDemoData = quickTest
-  (window as any).validateDemoData = validateDemoData
+  (window as any).quickTest = quickTest;
 } 
