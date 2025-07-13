@@ -252,7 +252,7 @@ export function QualificationManagement() {
       {/* 근무자 자격 현황 */}
       {activeView === 'status' && (
         <div className="space-y-6">
-          {staffQualifications?.map((staff) => (
+          {(staffQualifications as any[])?.map((staff: any) => (
             <Card key={staff.userId}>
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -276,7 +276,7 @@ export function QualificationManagement() {
                       보유 자격 ({staff.qualifications.length}개)
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {staff.qualifications.map((qual) => (
+                      {staff.qualifications?.map((qual: any) => (
                         <div
                           key={qual.id}
                           className="p-3 border border-green-200 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -303,7 +303,7 @@ export function QualificationManagement() {
                         미보유 자격 ({staff.missingQualifications.length}개)
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {staff.missingQualifications.map((missing) => (
+                        {staff.missingQualifications?.map((missing: any) => (
                           <div
                             key={missing.id}
                             className="p-3 border border-orange-200 bg-orange-50 dark:bg-orange-900/20 rounded-lg"
@@ -342,7 +342,7 @@ export function QualificationManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="korean-text min-w-[200px]">근무자</TableHead>
-                    {placementMatrix.operatingRooms.map((room) => (
+                    {(placementMatrix as any)?.operatingRooms?.map((room: any) => (
                       <TableHead key={room.id} className="text-center min-w-[120px]">
                         <div className="korean-text">{room.name}</div>
                         <div className="text-xs text-gray-500 korean-text">{room.specialty}</div>
@@ -351,7 +351,7 @@ export function QualificationManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {placementMatrix.staff.map((staff) => (
+                  {(placementMatrix as any)?.staff?.map((staff: any) => (
                     <TableRow key={staff.userId}>
                       <TableCell>
                         <div>
@@ -361,8 +361,8 @@ export function QualificationManagement() {
                           </div>
                         </div>
                       </TableCell>
-                      {placementMatrix.operatingRooms.map((room) => {
-                        const placement = (staff.placements as any)[room.id]
+                      {(placementMatrix as any)?.operatingRooms?.map((room: any) => {
+                        const placement = (staff.placements as any)?.[room.id]
                         return (
                           <TableCell key={room.id} className="text-center">
                             <div className="flex flex-col items-center space-y-1">
