@@ -289,6 +289,10 @@ export const adminRouter = createTRPCRouter({
         maxFileUploadSize: 10,
         enableNotifications: true,
         maintenanceMode: false,
+        systemVersion: '2.1.0',
+        lastBackup: new Date().toISOString(),
+        storageUsed: 145,
+        storageLimit: 5000,
       };
     }),
 
@@ -303,6 +307,10 @@ export const adminRouter = createTRPCRouter({
       maxFileUploadSize: z.number().optional(),
       enableNotifications: z.boolean().optional(),
       maintenanceMode: z.boolean().optional(),
+      systemVersion: z.string().optional(),
+      lastBackup: z.string().optional(),
+      storageUsed: z.number().optional(),
+      storageLimit: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       requireAdminAccess(ctx.user);
