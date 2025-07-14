@@ -22,128 +22,69 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+
   useEffect(() => {
-
-    // 최대 로딩 시간 제한 (3초)
-    const maxLoadingTimeout = setTimeout(() => {
-      console.log('⏰ 최대 로딩 시간 초과, 강제로 로딩 상태 해제')
-      setLoading(false)
-    }, 3000)
-
-    // 초기 세션 확인
     const getSession = async () => {
-      try {
-        // 실제 Supabase 세션 확인
-        console.log('🔄 Supabase 세션 확인 중...')
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          try {
-            const mockUser = JSON.parse(devSession)
-            setUser(mockUser)
-            console.log('개발 모드: 저장된 세션 복원', mockUser)
-          } catch (e) {
-            console.error('개발 모드 세션 파싱 에러:', e)
-          }
-        }
-        clearTimeout(maxLoadingTimeout)
-        setLoading(false)
-        return
-      }
-
-      // 실제 Supabase 모드
       try {
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
         setUser(session?.user ?? null)
-      } catch (error) {
-        console.error('세션 확인 에러:', error)
-        // Supabase 연결 실패 시 개발 모드로 전환
-        setIsDevelopmentMode(true)
-        const devSession = localStorage.getItem('dev-user-session')
-        if (devSession) {
-          try {
-            const mockUser = JSON.parse(devSession)
-            setUser(mockUser)
-            console.log('개발 모드로 전환: 저장된 세션 복원', mockUser)
-          } catch (e) {
-            console.error('개발 모드 세션 파싱 에러:', e)
-          }
+        
+        // Check admin status
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', session.user.id)
+            .single()
+          
+          setIsAdmin(profile?.is_admin || false)
         }
+      } catch (error) {
+        console.error('Session check error:', error)
+        setUser(null)
+        setIsAdmin(false)
+      } finally {
+        setLoading(false)
       }
-      clearTimeout(maxLoadingTimeout)
-      setLoading(false)
     }
 
     getSession()
 
-    // 실제 Supabase 모드에서만 인증 상태 변화 감지
-    if (!isDevMode) {
-      const supabase = createClient()
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          setUser(session?.user ?? null)
-          setLoading(false)
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('is_admin')
+              .eq('id', session.user.id)
+              .single()
+            
+            setIsAdmin(profile?.is_admin || false)
+          } catch (error) {
+            console.error('Admin check error:', error)
+            setIsAdmin(false)
+          }
+        } else {
+          setIsAdmin(false)
         }
-      )
-
-      return () => {
-        clearTimeout(maxLoadingTimeout)
-        subscription.unsubscribe()
+        
+        setLoading(false)
       }
-    }
+    )
 
-    return () => clearTimeout(maxLoadingTimeout)
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
     try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      // 🔧 개발 모드 조건 강화
-      const isDevelopmentMode = !supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here') ||
-          supabaseUrl.includes('placeholder') ||
-          supabaseKey.includes('placeholder') ||
-          supabaseUrl.includes('demo') ||
-          supabaseKey.includes('demo')
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (isDevelopmentMode) {
-        
-        // 🔍 기존 저장된 계정 확인
-        const existingSession = localStorage.getItem('dev-user-session')
-        if (existingSession) {
-          try {
-            const existingUser = JSON.parse(existingSession)
-            // 이메일이 일치하면 기존 계정으로 로그인
-            if (existingUser.email === email) {
-              console.log('🔍 기존 저장된 계정으로 로그인:', existingUser)
-              setUser(existingUser)
-              return {}
-            }
-          } catch (e) {
-            console.error('저장된 세션 파싱 오류:', e)
-          }
-        }
-        
-        // 새로운 모의 계정 생성
-        const mockUser = {
-          id: 'dev-user-' + Date.now(),
-          email,
-          user_metadata: { full_name: '개발자' }
-        }
-        
-        localStorage.setItem('dev-user-session', JSON.stringify(mockUser))
-        setUser(mockUser as any)
-        
-        return {}
-      }
-
-      // 🔧 Supabase 인증 시도 with 폴백
-      try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -151,40 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (error) {
-          // 400 에러나 API 키 관련 에러 시 개발 모드로 폴백
-          if (error.message.includes('API key') || 
-              error.message.includes('Invalid API key') ||
-              error.message.includes('400')) {
-            console.warn('🔧 Supabase 연결 실패 - 개발 모드로 전환')
-            
-            // 개발 모드 로그인 로직
-            const existingSession = localStorage.getItem('dev-user-session')
-            if (existingSession) {
-              try {
-                const existingUser = JSON.parse(existingSession)
-                if (existingUser.email === email) {
-                  console.log('🔍 기존 저장된 계정으로 로그인:', existingUser)
-                  setUser(existingUser)
-                  return {}
-                }
-              } catch (e) {
-                console.error('저장된 세션 파싱 오류:', e)
-              }
-            }
-            
-            // 새로운 모의 계정 생성
-            const mockUser = {
-              id: 'dev-user-' + Date.now(),
-              email,
-              user_metadata: { full_name: '개발자' }
-            }
-            
-            localStorage.setItem('dev-user-session', JSON.stringify(mockUser))
-            setUser(mockUser as any)
-            return {}
-          }
-          
-          // 일반적인 인증 에러
         if (error.message.includes('Invalid login credentials')) {
           return { error: "이메일 또는 비밀번호가 잘못되었습니다." }
         }
@@ -195,147 +102,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return {}
-      } catch (supabaseError) {
-        console.warn('🔧 Supabase 연결 오류 - 개발 모드로 전환:', supabaseError)
-        
-        // 개발 모드 로그인 로직 (폴백)
-        const existingSession = localStorage.getItem('dev-user-session')
-        if (existingSession) {
-          try {
-            const existingUser = JSON.parse(existingSession)
-            if (existingUser.email === email) {
-              console.log('🔍 기존 저장된 계정으로 로그인:', existingUser)
-              setUser(existingUser)
-              return {}
-            }
-          } catch (e) {
-            console.error('저장된 세션 파싱 오류:', e)
-          }
-        }
-        
-        // 새로운 모의 계정 생성
-        const mockUser = {
-          id: 'dev-user-' + Date.now(),
-          email,
-          user_metadata: { full_name: '개발자' }
-        }
-        
-        localStorage.setItem('dev-user-session', JSON.stringify(mockUser))
-        setUser(mockUser as any)
-        return {}
-      }
     } catch (error) {
-      console.error('로그인 상세 에러:', error)
-      
-      // 네트워크 에러 확인
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
-      }
-      
-      return { error: "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+      console.error('Sign in error:', error)
+      return { error: "로그인 중 오류가 발생했습니다." }
     }
   }
 
   const signUp = async (email: string, password: string, userData?: { full_name?: string }) => {
     try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (!supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here')) {
-        
-        const mockUser = {
-          id: 'dev-user-' + Date.now(),
-          email,
-          user_metadata: userData || {}
-        }
-        
-        localStorage.setItem('dev-user-session', JSON.stringify(mockUser))
-        setUser(mockUser as any)
-        
-        return {}
-      }
-
       const supabase = createClient()
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: userData,
-        },
-      })
-
-      if (error) {
-        // 더 구체적인 에러 메시지 제공
-        if (error.message.includes('Invalid email')) {
-          return { error: "올바른 이메일 주소를 입력해주세요." }
-        }
-        if (error.message.includes('Password')) {
-          return { error: "비밀번호는 6자 이상이어야 합니다." }
-        }
-        if (error.message.includes('User already registered')) {
-          return { error: "이미 가입된 이메일입니다. 로그인을 시도해주세요." }
-        }
-        return { error: error.message }
-      }
-
-      return {}
-    } catch (error) {
-      console.error('회원가입 상세 에러:', error)
-      
-      // 네트워크 에러 확인
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
-      }
-      
-      return { error: "회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
-    }
-  }
-
-  const createAdminAccount = async (email: string, password: string, adminData: { full_name: string, admin_level?: string }) => {
-    try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (!supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here')) {
-        
-        const mockAdminUser = {
-          id: 'admin-user-' + Date.now(),
-          email,
-          user_metadata: {
-            ...adminData,
-            role: 'admin',
-            admin_level: adminData.admin_level || 'super'
-          }
-        }
-        
-        localStorage.setItem('dev-user-session', JSON.stringify(mockAdminUser))
-        setUser(mockAdminUser as any)
-        
-        return {}
-      }
-
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            ...adminData,
-            role: 'admin',
-            admin_level: adminData.admin_level || 'super'
-          },
         },
       })
 
@@ -354,33 +134,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return {}
     } catch (error) {
-      console.error('관리자 계정 생성 에러:', error)
-      
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
+      console.error('Sign up error:', error)
+      return { error: "회원가입 중 오류가 발생했습니다." }
+    }
+  }
+
+  const createAdminAccount = async (email: string, password: string, adminData: { full_name: string, admin_level?: string }) => {
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            ...adminData,
+            role: 'admin',
+            admin_level: adminData.admin_level || 'super'
+          },
+        },
+      })
+
+      if (error) {
+        return { error: error.message }
       }
-      
-      return { error: "관리자 계정 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+
+      return {}
+    } catch (error) {
+      console.error('Create admin error:', error)
+      return { error: "관리자 계정 생성 중 오류가 발생했습니다." }
     }
   }
 
   const resendVerificationEmail = async (email: string) => {
     try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (!supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here')) {
-        
-        console.log('개발 모드: 이메일 재발송 기능은 모의 환경에서만 동작합니다.')
-        return {}
-      }
-
       const supabase = createClient()
       const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -393,142 +179,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return {}
     } catch (error) {
-      console.error('이메일 재발송 상세 에러:', error)
-      
-      // 네트워크 에러 확인
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
-      }
-      
-      return { error: "이메일 재발송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+      console.error('Resend email error:', error)
+      return { error: "이메일 재발송 중 오류가 발생했습니다." }
     }
   }
 
   const resetPassword = async (email: string) => {
     try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      console.log('🔍 비밀번호 재설정 요청 시작:', { email })
-      console.log('🔍 환경 변수 확인:', {
-        url: supabaseUrl,
-        hasKey: !!supabaseKey,
-        keyPrefix: supabaseKey ? supabaseKey.substring(0, 10) + '...' : 'undefined'
-      })
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (!supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here')) {
-        
-        console.log('⚠️ 개발 모드 감지: 비밀번호 재설정 이메일 발송 기능은 모의 환경에서만 동작합니다.')
-        return { error: "개발 모드에서는 이메일이 발송되지 않습니다. 프로덕션 환경에서 시도해주세요." }
-      }
-
-      console.log('✅ 프로덕션 모드 확인됨, Supabase 이메일 발송 시도 중...')
-      
       const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
-      console.log('📧 Supabase resetPasswordForEmail 응답:', { 
-        error: error ? error.message : null,
-        redirectTo: `${window.location.origin}/auth/reset-password`
-      })
-
       if (error) {
-        console.error('❌ 비밀번호 재설정 이메일 발송 실패:', error)
         if (error.message.includes('User not found')) {
           return { error: "해당 이메일로 가입된 계정을 찾을 수 없습니다." }
         }
         return { error: error.message }
       }
 
-      console.log('✅ 비밀번호 재설정 이메일 발송 성공!')
       return {}
     } catch (error) {
-      console.error('💥 비밀번호 재설정 상세 에러:', error)
-      
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
-      }
-      
-      return { error: "비밀번호 재설정 이메일 발송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+      console.error('Reset password error:', error)
+      return { error: "비밀번호 재설정 중 오류가 발생했습니다." }
     }
   }
 
   const updatePassword = async (password: string) => {
     try {
-      // 환경 변수 확인
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      // 개발 모드: 실제 Supabase 없이 테스트
-      if (!supabaseUrl || !supabaseKey || 
-          supabaseUrl.includes('your_supabase_url_here') || 
-          supabaseKey.includes('your_supabase_anon_key_here')) {
-        
-        console.log('개발 모드: 비밀번호 업데이트 기능은 모의 환경에서만 동작합니다.')
-        return {}
-      }
-
       const supabase = createClient()
-      const { error } = await supabase.auth.updateUser({ 
-        password: password 
+      const { error } = await supabase.auth.updateUser({
+        password,
       })
 
       if (error) {
-        if (error.message.includes('New password should be different')) {
-          return { error: "새 비밀번호는 기존 비밀번호와 달라야 합니다." }
-        }
-        if (error.message.includes('Password')) {
-          return { error: "비밀번호는 6자 이상이어야 합니다." }
-        }
         return { error: error.message }
       }
 
       return {}
     } catch (error) {
-      console.error('비밀번호 업데이트 상세 에러:', error)
-      
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          error: "네트워크 연결을 확인해주세요. Supabase 환경 변수가 올바르게 설정되어 있는지 확인하세요." 
-        }
-      }
-      
-      return { error: "비밀번호 업데이트 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+      console.error('Update password error:', error)
+      return { error: "비밀번호 업데이트 중 오류가 발생했습니다." }
     }
   }
 
   const signOut = async () => {
     try {
-      // 개발 모드가 아닌 경우에만 Supabase 로그아웃 호출
-      if (!isDevelopmentMode) {
-        const supabase = createClient()
-        await supabase.auth.signOut()
-      }
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      setUser(null)
+      setIsAdmin(false)
     } catch (error) {
-      console.error('로그아웃 에러:', error)
+      console.error('Sign out error:', error)
     }
-    
-    localStorage.removeItem('dev-user-session')
-    setUser(null)
   }
-
-  // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
-  // 관리자 권한은 profiles 테이블의 is_admin 필드로 확인
-  const isAdmin = isDevelopmentMode ? true : 
-    (user?.user_metadata?.role === 'admin' || user?.user_metadata?.is_admin === true)
-  
-  // 관리자 권한 디버깅 (필요시 주석 해제)
-  console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode, email: user?.email })
 
   const value = {
     user,
