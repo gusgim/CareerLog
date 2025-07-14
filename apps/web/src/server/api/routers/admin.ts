@@ -6,6 +6,14 @@ const adminSchema = z.object({
   details: z.string().optional(),
 })
 
+// 관리자 권한 확인 헬퍼 함수
+const checkAdminAccess = (user: any) => {
+  const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+  if (user?.user_metadata?.role !== 'admin' && !adminEmails.includes(user?.email || '')) {
+    throw new Error('관리자 권한이 필요합니다.');
+  }
+}
+
 export const adminRouter = createTRPCRouter({
   // 시스템 로그 저장
   logSystemActivity: protectedProcedure
@@ -13,8 +21,9 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { action, details } = input;
 
-      // 관리자 권한 확인
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 
@@ -31,8 +40,9 @@ export const adminRouter = createTRPCRouter({
   // 전체 시스템 상태 조회
   getSystemStats: protectedProcedure
     .query(async ({ ctx }) => {
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 
@@ -122,8 +132,9 @@ export const adminRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { limit = 20, offset = 0, search } = input || {};
       
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 
@@ -208,8 +219,9 @@ export const adminRouter = createTRPCRouter({
   // 백업 생성 (시뮬레이션)
   createBackup: protectedProcedure
     .mutation(async ({ ctx }) => {
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
     }
 
@@ -268,8 +280,9 @@ export const adminRouter = createTRPCRouter({
         maintenanceMode: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 
@@ -288,8 +301,9 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { userId } = input;
 
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 
@@ -325,8 +339,9 @@ export const adminRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { operatingRoom } = input;
 
-      // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
-      if (ctx.user?.user_metadata?.role !== 'admin' && ctx.user?.email !== 'gisugim0407@gmail.com') {
+      // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+      const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+      if (ctx.user?.user_metadata?.role !== 'admin' && !adminEmails.includes(ctx.user?.email || '')) {
         throw new Error('관리자 권한이 필요합니다.');
       }
 

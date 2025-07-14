@@ -533,9 +533,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }
 
-  // 관리자 권한 확인 - gisugim0407@gmail.com 특별 허용
+  // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
+  const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
   const isAdmin = isDevelopmentMode ? true : 
-    (user?.user_metadata?.role === 'admin' || user?.email === 'gisugim0407@gmail.com')
+    (user?.user_metadata?.role === 'admin' || adminEmails.includes(user?.email || ''))
   
   // 관리자 권한 디버깅 (필요시 주석 해제)
   console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode, email: user?.email })
