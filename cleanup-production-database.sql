@@ -14,7 +14,9 @@ DELETE FROM profiles WHERE is_admin = false OR is_admin IS NULL;
 SELECT '✅ 더미 사용자 프로필 삭제 완료' as status;
 
 -- 더미 관리자 계정들 삭제 (admin@careerlog.demo 포함)
-DELETE FROM profiles WHERE email IN ('admin@careerlog.demo') OR employee_id = 'ADMIN001';
+DELETE FROM profiles WHERE employee_id = 'ADMIN001' OR id IN (
+    SELECT id FROM auth.users WHERE email = 'admin@careerlog.demo'
+);
 SELECT '✅ 더미 관리자 계정 삭제 완료' as status;
 
 -- auth.users에서 더미 계정들 삭제
@@ -87,20 +89,20 @@ SELECT '✅ 프로덕션 관리자 정책 설정 완료' as status;
 SELECT '=== 카테고리 데이터 정리 ===' as status;
 
 -- 기본 카테고리만 유지
-DELETE FROM categories WHERE id NOT IN (
+DELETE FROM categories WHERE name NOT IN (
     'clinical', 'education', 'research', 'administrative', 'personal', 'quality'
 );
 
 -- 기본 카테고리 재삽입 (존재하지 않는 경우)
-INSERT INTO categories (id, name, description, color, icon, created_at, updated_at)
+INSERT INTO categories (name, name_ko, description, color, emoji)
 VALUES 
-    ('clinical', '임상 활동', '환자 진료 및 임상 업무', '#ef4444', 'Stethoscope', NOW(), NOW()),
-    ('education', '교육 활동', '교육 및 훈련 관련 활동', '#3b82f6', 'GraduationCap', NOW(), NOW()),
-    ('research', '연구 활동', '연구 및 학술 활동', '#8b5cf6', 'FlaskConical', NOW(), NOW()),
-    ('administrative', '행정 업무', '행정 및 관리 업무', '#f59e0b', 'FileText', NOW(), NOW()),
-    ('personal', '개인 개발', '개인적 성장 및 개발', '#10b981', 'User', NOW(), NOW()),
-    ('quality', '질 향상', '의료 질 향상 활동', '#f97316', 'TrendingUp', NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+    ('clinical', '임상 활동', '환자 진료 및 임상 업무', '#ef4444', '🩺'),
+    ('education', '교육 활동', '교육 및 훈련 관련 활동', '#3b82f6', '🎓'),
+    ('research', '연구 활동', '연구 및 학술 활동', '#8b5cf6', '🔬'),
+    ('administrative', '행정 업무', '행정 및 관리 업무', '#f59e0b', '📋'),
+    ('personal', '개인 개발', '개인적 성장 및 개발', '#10b981', '👤'),
+    ('quality', '질 향상', '의료 질 향상 활동', '#f97316', '📈')
+ON CONFLICT (name) DO NOTHING;
 
 SELECT '✅ 카테고리 데이터 정리 완료' as status;
 
