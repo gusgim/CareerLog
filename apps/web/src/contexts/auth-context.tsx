@@ -22,18 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false)
-
   useEffect(() => {
-    // 환경 변수 확인 및 개발 모드 설정
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    
-    const isDevMode = !supabaseUrl || !supabaseKey || 
-                     supabaseUrl.includes('your_supabase_url_here') || 
-                     supabaseKey.includes('your_supabase_anon_key_here')
-
-    setIsDevelopmentMode(isDevMode)
 
     // 최대 로딩 시간 제한 (3초)
     const maxLoadingTimeout = setTimeout(() => {
@@ -43,11 +32,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 초기 세션 확인
     const getSession = async () => {
-      if (isDevMode) {
-        // 개발 모드: 로컬 스토리지에서 모의 세션 확인 (즉시 처리)
-        console.log('🔧 개발 모드: 로컬 스토리지에서 세션 확인')
-        const devSession = localStorage.getItem('dev-user-session')
-        if (devSession) {
+      try {
+        // 실제 Supabase 세션 확인
+        console.log('🔄 Supabase 세션 확인 중...')
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
           try {
             const mockUser = JSON.parse(devSession)
             setUser(mockUser)
@@ -534,9 +523,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // 관리자 권한 확인 (더미 데이터 관리자 계정 추가)
-  const adminEmails = ['gisugim0407@gmail.com', 'admin@careerlog.demo'];
+  // 관리자 권한은 profiles 테이블의 is_admin 필드로 확인
   const isAdmin = isDevelopmentMode ? true : 
-    (user?.user_metadata?.role === 'admin' || adminEmails.includes(user?.email || ''))
+    (user?.user_metadata?.role === 'admin' || user?.user_metadata?.is_admin === true)
   
   // 관리자 권한 디버깅 (필요시 주석 해제)
   console.log('🔍 현재 사용자 정보:', { user, isAdmin, isDevelopmentMode, email: user?.email })
