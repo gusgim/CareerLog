@@ -162,6 +162,8 @@ export function AutoScheduling() {
       date: emergencyForm.date,
       operatingRoom: emergencyForm.operatingRoom,
       urgencyLevel: emergencyForm.urgencyLevel,
+      requiredStaff: 2, // 기본값
+      estimatedDuration: 4, // 기본값 (시간)
     })
   }
 

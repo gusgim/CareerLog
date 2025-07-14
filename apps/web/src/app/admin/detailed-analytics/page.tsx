@@ -8,10 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Users, BarChart3, User, Calendar, Award, Building, Clock } from "lucide-react"
 import Link from "next/link"
-// import { UserAnalytics } from "@/components/user-analytics"
-// import { SurgeryRoomAnalytics } from "@/components/surgery-room-analytics"
-// import { QualificationManagement } from "@/components/qualification-management"
-// import { AutoScheduling } from "@/components/auto-scheduling"
+import { UserAnalytics } from "@/components/user-analytics"
+import { SurgeryRoomAnalytics } from "@/components/surgery-room-analytics"
+import { QualificationManagement } from "@/components/qualification-management"
+import { AutoScheduling } from "@/components/auto-scheduling"
 
 export default function DetailedAnalyticsPage() {
   const { isAdmin } = useAuth()
@@ -128,10 +128,7 @@ export default function DetailedAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* <QualificationManagement /> */}
-                  <div className="text-center py-8 text-gray-500 korean-text">
-                    자격 관리 기능은 준비 중입니다.
-                  </div>
+                  <QualificationManagement />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -149,10 +146,7 @@ export default function DetailedAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* <SurgeryRoomAnalytics /> */}
-                  <div className="text-center py-8 text-gray-500 korean-text">
-                    수술방 분석 기능은 준비 중입니다.
-                  </div>
+                  <SurgeryRoomAnalytics />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -170,10 +164,7 @@ export default function DetailedAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* <UserAnalytics /> */}
-                  <div className="text-center py-8 text-gray-500 korean-text">
-                    사용자 분석 기능은 준비 중입니다.
-                  </div>
+                  <UserAnalytics />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -191,10 +182,7 @@ export default function DetailedAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* <AutoScheduling /> */}
-                  <div className="text-center py-8 text-gray-500 korean-text">
-                    자동 스케줄링 기능은 준비 중입니다.
-                  </div>
+                  <AutoScheduling />
                 </CardContent>
               </Card>
             </TabsContent>

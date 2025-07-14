@@ -49,7 +49,7 @@ export function SurgeryRoomAnalytics({ className }: SurgeryRoomAnalyticsProps) {
     error: analyticsError,
     refetch: refetchAnalytics 
   } = api.admin.getSurgeryRoomWorkFrequency.useQuery(
-    { operatingRoom: selectedRoom },
+    { roomId: selectedRoom ? parseInt(selectedRoom) : undefined },
     { 
       enabled: !!selectedRoom,
       onSuccess: (data) => {

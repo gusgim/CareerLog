@@ -21,7 +21,7 @@ export function UserAnalytics() {
   )
 
   const { data: analytics, isLoading } = api.admin.getUserAnalytics.useQuery(
-    { userId: selectedUserId, period: selectedPeriod },
+    { userId: selectedUserId, period: `${selectedPeriod}months` as "6months" | "12months" | "18months" | "24months" },
     { 
       enabled: !!selectedUserId,
       retry: false 
@@ -78,7 +78,7 @@ export function UserAnalytics() {
                       <div className="flex items-center space-x-2">
                         <User className="h-4 w-4" />
                         <span className="korean-text">
-                          {user.fullName} ({user.department}, {user.yearsOfExperience}년차)
+                          {user.full_name} ({user.department || '부서미정'}, {user.role || '직책미정'})
                         </span>
                       </div>
                     </SelectItem>
